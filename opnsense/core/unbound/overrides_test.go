@@ -1,6 +1,7 @@
 package unbound
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/oss4u/go-opnsense/opnsense"
 	"testing"
@@ -11,7 +12,7 @@ func TestCreateUpdateDelete(t *testing.T) {
 	overrides := Get_HostOverrides(api)
 	hostDetails := OverridesHostDetails{
 		Uuid:        "",
-		Enabled:     "1",
+		Enabled:     true,
 		Hostname:    "123",
 		Domain:      "asdf",
 		Rr:          "A",
@@ -31,7 +32,7 @@ func TestToJson(t *testing.T) {
 	//overrides := Get_HostOverrides(api)
 	hostDetails := OverridesHostDetails{
 		Uuid:        "",
-		Enabled:     "1",
+		Enabled:     true,
 		Hostname:    "123",
 		Domain:      "asdf",
 		Rr:          "A",
@@ -39,7 +40,8 @@ func TestToJson(t *testing.T) {
 		Server:      "10.10.10.10",
 	}
 	host := OverridesHost{Host: hostDetails}
-	json := host.Host.ConvertToJson()
-	fmt.Print(json)
+	//json := host.Host.ConvertToJson()
+	result, _ := json.Marshal(host)
+	fmt.Print(string(result))
 
 }
