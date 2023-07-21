@@ -58,16 +58,13 @@ func (o Overrides) Update(host *OverridesHost) (*OverridesHost, error) {
 	return host, nil
 }
 
-func (o Overrides) Delete(host *OverridesHost) {
-	o.DeleteByID(host.Host.GetUUID())
+func (o Overrides) Delete(host *OverridesHost) error {
+	return o.DeleteByID(host.Host.GetUUID())
 }
 
-func (o Overrides) DeleteByID(uuid string) {
+func (o Overrides) DeleteByID(uuid string) error {
 	params := []string{}
 	params = append(params, uuid)
-	request, err := o.api.ModifyingRequest(o.module, o.controller, "delHostOverride", "", params)
-	fmt.Printf("Result: %s\n", request)
-	if err != nil {
-		return
-	}
+	_, err := o.api.ModifyingRequest(o.module, o.controller, "delHostOverride", "", params)
+	return err
 }
