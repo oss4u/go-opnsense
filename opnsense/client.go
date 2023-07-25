@@ -50,7 +50,6 @@ func (c *OpnSenseApi) ModifyingRequest(module string, controller string, command
 	client := c.get_client()
 	modifyLock.Lock()
 	defer modifyLock.Unlock()
-	fmt.Printf("Address: %s key: %s / secret %s\n", c.address, c.key, c.secret)
 	request := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetBasicAuth(c.key, c.secret)
@@ -70,7 +69,6 @@ func (c *OpnSenseApi) ModifyingRequest(module string, controller string, command
 	} else {
 		request = request.SetBody(`{}`)
 	}
-	fmt.Printf("URL: %s\n", url)
 	res, err := request.
 		Post(url)
 	if err != nil {
@@ -82,7 +80,6 @@ func (c *OpnSenseApi) ModifyingRequest(module string, controller string, command
 
 func (c *OpnSenseApi) NonModifyingRequest(module string, controller string, command string, params []string) (string, error) {
 	client := c.get_client()
-	fmt.Printf("key: %s / secret %s", c.key, c.secret)
 	request := client.R().
 		SetBasicAuth(c.key, c.secret)
 	url := ""
