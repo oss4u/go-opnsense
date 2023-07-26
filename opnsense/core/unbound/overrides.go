@@ -45,7 +45,7 @@ func (o Overrides) Read(uuid string) (*OverridesHost, error) {
 	param := []string{}
 	param = append(param, uuid)
 	result, retCode, err := o.api.NonModifyingRequest(o.module, o.controller, "getHostOverride", param)
-	fmt.Sprintf("Result: %s", result)
+	fmt.Printf("Result: %s", result)
 	if retCode == 200 {
 		host := OverridesHost{}
 		json.Unmarshal([]byte(result), host)
