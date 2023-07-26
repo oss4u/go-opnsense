@@ -78,7 +78,7 @@ func (c *OpnSenseApi) ModifyingRequest(module string, controller string, command
 	return res.String(), nil
 }
 
-func (c *OpnSenseApi) NonModifyingRequest(module string, controller string, command string, params []string) (string, error) {
+func (c *OpnSenseApi) NonModifyingRequest(module string, controller string, command string, params []string) (string, int, error) {
 	client := c.get_client()
 	request := client.R().
 		SetBasicAuth(c.key, c.secret)
@@ -94,7 +94,7 @@ func (c *OpnSenseApi) NonModifyingRequest(module string, controller string, comm
 	}
 	res, err := request.Get(url)
 	if err != nil {
-		return res.String(), err
+		return res.String(), res.StatusCode(), err
 	}
-	return res.String(), nil
+	return res.String(), res.StatusCode(), nil
 }
