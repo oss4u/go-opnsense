@@ -48,7 +48,7 @@ func (o Overrides) Read(uuid string) (*OverridesHost, error) {
 	fmt.Printf("Result: %s", result)
 	if retCode == 200 {
 		host := OverridesHost{}
-		json.Unmarshal([]byte(result), host)
+		json.Unmarshal([]byte(result), &host)
 		return &host, err
 	} else {
 		return nil, err
