@@ -54,6 +54,7 @@ func (c *OpnSenseApi) ModifyingRequest(module string, controller string, command
 		SetHeader("Content-Type", "application/json").
 		SetBasicAuth(c.key, c.secret)
 	url := ""
+
 	if len(params) > 0 {
 		p := ""
 		for _, v := range params {
@@ -93,6 +94,7 @@ func (c *OpnSenseApi) NonModifyingRequest(module string, controller string, comm
 		url = fmt.Sprintf("%s/api/%s/%s/%s", c.address, module, controller, command)
 	}
 	res, err := request.Get(url)
+	fmt.Printf("res: %s", res.String())
 	if err != nil {
 		return res.String(), res.StatusCode(), err
 	}
