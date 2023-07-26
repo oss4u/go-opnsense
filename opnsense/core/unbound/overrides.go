@@ -41,10 +41,16 @@ func (o Overrides) Create(host *OverridesHost) (*OverridesHost, error) {
 	return host, nil
 }
 
-func (o Overrides) Read(uuid string) {
+func (o Overrides) Read(uuid string) (*OverridesHost, error) {
 	param := []string{}
 	param = append(param, uuid)
-	o.api.NonModifyingRequest(o.module, o.controller, "getHostOverride", param)
+	result, err := o.api.NonModifyingRequest(o.module, o.controller, "getHostOverride", param)
+	if err != nil {
+		return nil, err
+	}
+	host := OverridesHost{}
+	json.Unmarshal([]byte(result), host)
+	return &host, nil
 }
 
 func (o Overrides) Update(host *OverridesHost) (*OverridesHost, error) {
