@@ -1,6 +1,10 @@
 package unbound
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+	"strconv"
+)
 
 type ConvertableToJson interface {
 	ConvertToJson() string
@@ -12,14 +16,20 @@ type OverridesHost struct {
 	Host OverridesHostDetails `json:"host"`
 }
 
-func (h OverridesHost) UnmarshalJSON(data []byte) error {
+func (h *OverridesHost) UnmarshalJSON(data []byte) error {
+	fmt.Printf("OH %s\n", string(data))
 	type Alias OverridesHost
+	//aux := OverridesHost{}
+	var x map[string]interface{}
+	json.Unmarshal(data, &x)
+	fmt.Println(x)
 	aux := struct {
 		Host OverridesHostDetails `json:"host"`
 	}{}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
+	h.Host = aux.Host
 	return nil
 }
 
@@ -48,25 +58,40 @@ func (h OverridesHostDetails) ConvertToJson() string {
 	return string(b)
 }
 
-func (h OverridesHostDetails) UnmarshalJSON(data []byte) error {
+func (h *OverridesHostDetails) UnmarshalJSON(data []byte) error {
+	fmt.Printf("OHD %s\n", string(data))
 	aux := struct {
-		Uuid        string `json:"uuid,omitempty"`
-		Enabled     string `json:"enabled"`
-		Hostname    string `json:"hostname"`
-		Domain      string `json:"domain"`
-		Rr          string `json:"rr"`
+		Uuid     string `json:"uuid,omitempty"`
+		Enabled  string `json:"enabled"`
+		Hostname string `json:"hostname"`
+		Domain   string `json:"domain"`
+		Rr       map[string]struct {
+			Value    string `json:"value"`
+			Selected int    `json:"selected"`
+		} `json:"rr"`
 		Description string `json:"description"`
-		Mxprio      int    `json:"mxprio,omitempty"`
+		Mxprio      string `json:"mxprio,omitempty"`
 		Mx          string `json:"mx,omitempty"`
 		Server      string `json:"server,omitempty"`
 	}{}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
+	h.Hostname = aux.Hostname
+	h.Domain = aux.Domain
+	h.Description = aux.Description
+	h.Mxprio, _ = strconv.Atoi(aux.Mxprio)
+	h.Mx = aux.Mx
+	h.Server = aux.Server
 	if aux.Enabled == "1" {
 		h.Enabled = true
 	} else {
 		h.Enabled = false
+	}
+	for k, v := range aux.Rr {
+		if v.Selected == 1 {
+			h.Rr = k
+		}
 	}
 	return nil
 }
