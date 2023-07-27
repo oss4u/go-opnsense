@@ -1,11 +1,13 @@
 package ifaces
 
-import "github.com/oss4u/go-opnsense/opnsense/core/unbound"
+import (
+	"github.com/oss4u/go-opnsense/opnsense/core/unbound/overrides"
+)
 
 type IOverrides interface {
-	Create(host *unbound.OverridesHost) (*unbound.OverridesHost, error)
+	Create(host *overrides.OverridesHost) (*overrides.OverridesHost, error)
 	Read(uuid string)
-	Update(host *unbound.OverridesHost) (*unbound.OverridesHost, error)
-	Delete(host unbound.OverridesHost)
+	Update(host *overrides.OverridesHost) (*overrides.OverridesHost, error)
+	Delete(host overrides.OverridesHost)
 	DeleteByID(uuid string)
 }
