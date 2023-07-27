@@ -1,4 +1,4 @@
-package unbound
+package overrides
 
 import (
 	"encoding/json"
@@ -6,15 +6,7 @@ import (
 	"github.com/oss4u/go-opnsense/opnsense"
 )
 
-func Get_HostOverrides(api *opnsense.OpnSenseApi) Overrides {
-	return Overrides{
-		api:        api,
-		module:     "unbound",
-		controller: "settings",
-	}
-}
-
-type Overrides struct {
+type OverridesHostsApi struct {
 	api        *opnsense.OpnSenseApi
 	module     string
 	controller string
@@ -25,7 +17,7 @@ type Result struct {
 	Uuid   string `json:"uuid"`
 }
 
-func (o Overrides) Create(host *OverridesHost) (*OverridesHost, error) {
+func (o OverridesHostsApi) Create(host *OverridesHost) (*OverridesHost, error) {
 	data, err := json.Marshal(host)
 	if err != nil {
 		return nil, err
@@ -41,7 +33,7 @@ func (o Overrides) Create(host *OverridesHost) (*OverridesHost, error) {
 	return host, nil
 }
 
-func (o Overrides) Read(uuid string) (*OverridesHost, error) {
+func (o OverridesHostsApi) Read(uuid string) (*OverridesHost, error) {
 	param := []string{}
 	param = append(param, uuid)
 	result, retCode, err := o.api.NonModifyingRequest(o.module, o.controller, "getHostOverride", param)
@@ -55,7 +47,7 @@ func (o Overrides) Read(uuid string) (*OverridesHost, error) {
 	}
 }
 
-func (o Overrides) Update(host *OverridesHost) (*OverridesHost, error) {
+func (o OverridesHostsApi) Update(host *OverridesHost) (*OverridesHost, error) {
 	params := []string{}
 	params = append(params, host.Host.GetUUID())
 	data, err := json.Marshal(host)
@@ -66,11 +58,11 @@ func (o Overrides) Update(host *OverridesHost) (*OverridesHost, error) {
 	return host, nil
 }
 
-func (o Overrides) Delete(host *OverridesHost) error {
+func (o OverridesHostsApi) Delete(host *OverridesHost) error {
 	return o.DeleteByID(host.Host.GetUUID())
 }
 
-func (o Overrides) DeleteByID(uuid string) error {
+func (o OverridesHostsApi) DeleteByID(uuid string) error {
 	params := []string{}
 	params = append(params, uuid)
 	_, err := o.api.ModifyingRequest(o.module, o.controller, "delHostOverride", "", params)
