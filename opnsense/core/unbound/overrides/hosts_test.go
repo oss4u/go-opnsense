@@ -1,8 +1,11 @@
 package overrides
 
 import (
+	"fmt"
+	"github.com/joho/godotenv"
 	"github.com/oss4u/go-opnsense/opnsense"
 	"github.com/stretchr/testify/suite"
+	"log"
 	"os"
 	"testing"
 )
@@ -11,9 +14,18 @@ type HostsTestSuite struct {
 	suite.Suite
 }
 
-func TestCreateUpdateDelete(t *testing.T) {
+func (s HostsTestSuite) SetupTest() {
+	workingDir, _ := os.Getwd()
+	err := godotenv.Load(fmt.Sprintf("%s/.env", workingDir))
+
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+}
+
+func (s HostsTestSuite) TestCreateUpdateDelete() {
 	if os.Getenv("OPNSENSE_ADDRESS") == "" {
-		t.Skip("Missing credentials")
+		s.T().Skip("Missing credentials")
 	}
 	api := opnsense.GetOpnSenseClient("", "", "")
 	overrides := GetHostsOverrideApi(api)
@@ -32,4 +44,8 @@ func TestCreateUpdateDelete(t *testing.T) {
 	updatedHost, _ := overrides.Update(createdHost)
 	overrides.Delete(updatedHost)
 
+}
+
+func TestHostsTestSuite(t *testing.T) {
+	suite.Run(t, new(HostsTestSuite))
 }

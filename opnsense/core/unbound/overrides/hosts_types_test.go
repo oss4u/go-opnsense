@@ -30,9 +30,9 @@ func (s HostsOverridesTestSuite) TestToJson() {
 }
 
 func (s HostsOverridesTestSuite) TestFromJsonToOverridesHost() {
-	json_string := "{\"host\":{\"enabled\":\"1\",\"hostname\":\"srv01\",\"domain\":\"dev.sys-int.de\",\"rr\":{\"A\":{\"value\":\"A (IPv4 address)\",\"selected\":0},\"AAAA\":{\"value\":\"AAAA (IPv6 address)\",\"selected\":0},\"MX\":{\"value\":\"MX (Mail server)\",\"selected\":1}},\"mxprio\":\"10\",\"mx\":\"srv01.dev.sys-int.de\",\"server\":\"server01\",\"description\":\"srv01 - MX\"}}"
+	jsonString := "{\"host\":{\"enabled\":\"1\",\"hostname\":\"srv01\",\"domain\":\"dev.sys-int.de\",\"rr\":{\"A\":{\"value\":\"A (IPv4 address)\",\"selected\":0},\"AAAA\":{\"value\":\"AAAA (IPv6 address)\",\"selected\":0},\"MX\":{\"value\":\"MX (Mail server)\",\"selected\":1}},\"mxprio\":\"10\",\"mx\":\"srv01.dev.sys-int.de\",\"server\":\"server01\",\"description\":\"srv01 - MX\"}}"
 	host := OverridesHost{}
-	err := json.Unmarshal([]byte(json_string), &host)
+	err := json.Unmarshal([]byte(jsonString), &host)
 	assert.Nil(s.T(), err)
 	assert.NotNil(s.T(), host.Host)
 	assert.Equal(s.T(), types.Bool(true), host.Host.Enabled)
@@ -46,9 +46,9 @@ func (s HostsOverridesTestSuite) TestFromJsonToOverridesHost() {
 }
 
 func (s HostsOverridesTestSuite) TestFromJsonToOverridesHostDetails() {
-	json_string := "{\"enabled\":\"1\",\"hostname\":\"srv01\",\"domain\":\"dev.sys-int.de\",\"rr\":{\"A\":{\"value\":\"A (IPv4 address)\",\"selected\":0},\"AAAA\":{\"value\":\"AAAA (IPv6 address)\",\"selected\":0},\"MX\":{\"value\":\"MX (Mail server)\",\"selected\":1}},\"mxprio\":\"10\",\"mx\":\"srv01.dev.sys-int.de\",\"server\":\"server01\",\"description\":\"srv01 - MX\"}"
+	jsonString := "{\"enabled\":\"1\",\"hostname\":\"srv01\",\"domain\":\"dev.sys-int.de\",\"rr\":{\"A\":{\"value\":\"A (IPv4 address)\",\"selected\":0},\"AAAA\":{\"value\":\"AAAA (IPv6 address)\",\"selected\":0},\"MX\":{\"value\":\"MX (Mail server)\",\"selected\":1}},\"mxprio\":\"10\",\"mx\":\"srv01.dev.sys-int.de\",\"server\":\"server01\",\"description\":\"srv01 - MX\"}"
 	host := OverridesHostDetails{}
-	err := json.Unmarshal([]byte(json_string), &host)
+	err := json.Unmarshal([]byte(jsonString), &host)
 	assert.Nil(s.T(), err)
 	assert.Equal(s.T(), types.Bool(true), host.Enabled)
 	assert.Equal(s.T(), "srv01", host.Hostname)
