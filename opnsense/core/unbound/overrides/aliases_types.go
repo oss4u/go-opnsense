@@ -15,3 +15,15 @@ type OverridesAliasDetails struct {
 	Domain      string     `json:"domain"`
 	Description string     `json:"description"`
 }
+
+func NewOverridesAlias(enabled bool, host string, hostname string, domain string, description string) *OverridesAlias {
+	return &OverridesAlias{
+		Alias: OverridesAliasDetails{
+			Enabled:     types.Bool(enabled),
+			Host:        host,
+			Hostname:    hostname,
+			Domain:      domain,
+			Description: description,
+		},
+	}
+}

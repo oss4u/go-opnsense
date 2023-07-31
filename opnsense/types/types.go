@@ -20,5 +20,7 @@ func (h Bool) MarshalJSON() ([]byte, error) {
 }
 
 func (b *Bool) Bool() bool {
-	return *(*bool)(b)
+	var val bool
+	val = *(*bool)(b)
+	return val
 }
