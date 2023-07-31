@@ -73,3 +73,15 @@ func (s OverridesTestSuite) TestFromJsonToOverridesHostDetails() {
 	assert.Equal(s.T(), "srv01 - MX", host.Description)
 	assert.Equal(s.T(), "server01", host.Server)
 }
+
+func (s OverridesTestSuite) TestMxPrioToInt() {
+	var cut MxPrio
+	cut = 101
+	assert.Equal(s.T(), 101, cut.int())
+}
+
+func (s OverridesTestSuite) TestRrToString() {
+	var cut Rr
+	cut = "AAAA"
+	assert.Equal(s.T(), "AAAA", cut.String())
+}

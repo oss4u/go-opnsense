@@ -20,6 +20,10 @@ type OverridesHost struct {
 
 type Rr string
 
+func (r *Rr) String() string {
+	return *(*string)(r)
+}
+
 func (r *Rr) UnmarshalJSON(data []byte) error {
 	aux := map[string]struct {
 		Value    string `json:"value"`
@@ -41,6 +45,10 @@ func (r *Rr) MarshalJSON() ([]byte, error) {
 }
 
 type MxPrio int
+
+func (m *MxPrio) int() int {
+	return *(*int)(m)
+}
 
 func (m *MxPrio) UnmarshalJSON(data []byte) error {
 	res := strings.Trim(string(data), "\"")

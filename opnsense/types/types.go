@@ -18,3 +18,7 @@ func (h Bool) MarshalJSON() ([]byte, error) {
 		return []byte(`"0"`), nil
 	}
 }
+
+func (b *Bool) Bool() bool {
+	return *(*bool)(b)
+}
