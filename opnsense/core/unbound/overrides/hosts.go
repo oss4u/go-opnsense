@@ -17,7 +17,7 @@ type Result struct {
 	Uuid   string `json:"uuid"`
 }
 
-func (o OverridesHostsApi) Create(host *OverridesHost) (*OverridesHost, error) {
+func (o OverridesHostsApi) CreateOverridesHost(host *OverridesHost) (*OverridesHost, error) {
 	data, err := json.Marshal(host)
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func (o OverridesHostsApi) Create(host *OverridesHost) (*OverridesHost, error) {
 	return host, nil
 }
 
-func (o OverridesHostsApi) Read(uuid string) (*OverridesHost, error) {
+func (o OverridesHostsApi) ReadOverridesHost(uuid string) (*OverridesHost, error) {
 	param := []string{}
 	param = append(param, uuid)
 	result, retCode, err := o.api.NonModifyingRequest(o.module, o.controller, "getHostOverride", param)
@@ -49,7 +49,7 @@ func (o OverridesHostsApi) Read(uuid string) (*OverridesHost, error) {
 	}
 }
 
-func (o OverridesHostsApi) Update(host *OverridesHost) (*OverridesHost, error) {
+func (o OverridesHostsApi) UpdateOverridesHost(host *OverridesHost) (*OverridesHost, error) {
 	params := []string{}
 	params = append(params, host.Host.GetUUID())
 	data, err := json.Marshal(host)
@@ -60,11 +60,11 @@ func (o OverridesHostsApi) Update(host *OverridesHost) (*OverridesHost, error) {
 	return host, nil
 }
 
-func (o OverridesHostsApi) Delete(host *OverridesHost) error {
-	return o.DeleteByID(host.Host.GetUUID())
+func (o OverridesHostsApi) DeleteOverridesHost(host *OverridesHost) error {
+	return o.DeleteByIDOverridesHost(host.Host.GetUUID())
 }
 
-func (o OverridesHostsApi) DeleteByID(uuid string) error {
+func (o OverridesHostsApi) DeleteByIDOverridesHost(uuid string) error {
 	params := []string{}
 	params = append(params, uuid)
 	_, err := o.api.ModifyingRequest(o.module, o.controller, "delHostOverride", "", params)
