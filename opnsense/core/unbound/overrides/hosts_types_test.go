@@ -77,7 +77,7 @@ func (s OverridesTestSuite) TestFromJsonToOverridesHostDetails() {
 func (s OverridesTestSuite) TestMxPrioToInt() {
 	var cut MxPrio
 	cut = 101
-	assert.Equal(s.T(), 101, cut.int())
+	assert.Equal(s.T(), 101, cut.Int())
 }
 
 func (s OverridesTestSuite) TestRrToString() {

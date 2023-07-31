@@ -46,7 +46,7 @@ func (r *Rr) MarshalJSON() ([]byte, error) {
 
 type MxPrio int
 
-func (m *MxPrio) int() int {
+func (m *MxPrio) Int() int {
 	return *(*int)(m)
 }
 
