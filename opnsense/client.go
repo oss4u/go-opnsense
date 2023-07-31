@@ -17,7 +17,7 @@ func GetOpnSenseClient(host string, key string, secret string) *OpnSenseApi {
 		createLock.Lock()
 		defer createLock.Unlock()
 		if host == "" || key == "" || secret == "" {
-			host = os.Getenv("OPNSENSE_ADDR")
+			host = os.Getenv("OPNSENSE_ADDRESS")
 			key = os.Getenv("OPNSENSE_KEY")
 			secret = os.Getenv("OPNSENSE_SECRET")
 		}
