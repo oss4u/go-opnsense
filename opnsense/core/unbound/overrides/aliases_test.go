@@ -5,7 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (s OverridesTestSuite) TestCreateUpdateDeleteHost() {
+func (s OverridesTestSuite) TestCreateUpdateDeleteAliases() {
 	if !s.IntegrationTest {
 		s.T().Skip("CI Build - Skipping integration tests")
 	}
