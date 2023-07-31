@@ -17,7 +17,7 @@ func TestHostsOverridesTestSuite(t *testing.T) {
 	suite.Run(t, new(OverridesTestSuite))
 }
 
-func (s OverridesTestSuite) SetupSuite() {
+func (s *OverridesTestSuite) SetupSuite() {
 	var err error
 	err = godotenv.Load("../../../../.env")
 	if err != nil {
@@ -39,6 +39,6 @@ func (s OverridesTestSuite) SetupSuite() {
 
 }
 
-func (s OverridesTestSuite) TearDownSuite() {
+func (s *OverridesTestSuite) TearDownSuite() {
 	s.vagrantClient.Destroy()
 }
