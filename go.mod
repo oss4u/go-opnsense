@@ -3,8 +3,10 @@ module github.com/oss4u/go-opnsense
 go 1.20
 
 require (
+	github.com/bmatcuk/go-vagrant v1.6.0
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/joho/godotenv v1.5.1
+	github.com/kinbiko/jsonassert v1.1.1
 	github.com/stretchr/testify v1.8.4
 )
 

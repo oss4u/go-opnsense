@@ -1,29 +1,12 @@
 package overrides
 
 import (
-	"fmt"
-	"github.com/joho/godotenv"
 	"github.com/oss4u/go-opnsense/opnsense"
-	"github.com/stretchr/testify/suite"
-	"log"
+	"github.com/stretchr/testify/assert"
 	"os"
-	"testing"
 )
 
-type HostsTestSuite struct {
-	suite.Suite
-}
-
-func (s HostsTestSuite) SetupTest() {
-	workingDir, _ := os.Getwd()
-	err := godotenv.Load(fmt.Sprintf("%s/.env", workingDir))
-
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-}
-
-func (s HostsTestSuite) TestCreateUpdateDelete() {
+func (s OverridesTestSuite) TestCreateUpdateDelete() {
 	if os.Getenv("OPNSENSE_ADDRESS") == "" {
 		s.T().Skip("Missing credentials")
 	}
@@ -40,12 +23,12 @@ func (s HostsTestSuite) TestCreateUpdateDelete() {
 	}
 	host := OverridesHost{Host: hostDetails}
 	createdHost, _ := overrides.Create(&host)
+	assert.NotNil(s.T(), createdHost)
 	createdHost.Host.Hostname = "456"
 	updatedHost, _ := overrides.Update(createdHost)
+	assert.NotNil(s.T(), updatedHost)
 	overrides.Delete(updatedHost)
+	unavailableHost, _ := overrides.Read(updatedHost.Host.Uuid)
+	assert.Nil(s.T(), unavailableHost)
 
-}
-
-func TestHostsTestSuite(t *testing.T) {
-	suite.Run(t, new(HostsTestSuite))
 }

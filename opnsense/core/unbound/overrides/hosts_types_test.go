@@ -2,17 +2,17 @@ package overrides
 
 import (
 	"encoding/json"
+	"github.com/kinbiko/jsonassert"
 	"github.com/oss4u/go-opnsense/opnsense/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type HostsOverridesTestSuite struct {
 	suite.Suite
 }
 
-func (s HostsOverridesTestSuite) TestToJson() {
+func (s OverridesTestSuite) TestToJson() {
 	hostDetails := OverridesHostDetails{
 		Uuid:        "",
 		Enabled:     true,
@@ -24,12 +24,26 @@ func (s HostsOverridesTestSuite) TestToJson() {
 	}
 	host := OverridesHost{Host: hostDetails}
 	//json := host.Host.ConvertToJson()
-	json.Marshal(host)
+	data, err := json.Marshal(host)
+	assert.Nil(s.T(), err)
+	ja := jsonassert.New(s.T())
+	ja.Assertf(string(data), `
+	{
+		"host": 
+			{
+				"enabled": "1",
+				"hostname": "123",
+				"rr": "A",
+				"server": "10.10.10.10",
+				"description": "asdfasdf",
+				"domain": "asdf"
+			}
+	}`)
 	//fmt.Print(string(result))
 
 }
 
-func (s HostsOverridesTestSuite) TestFromJsonToOverridesHost() {
+func (s OverridesTestSuite) TestFromJsonToOverridesHost() {
 	jsonString := "{\"host\":{\"enabled\":\"1\",\"hostname\":\"srv01\",\"domain\":\"dev.sys-int.de\",\"rr\":{\"A\":{\"value\":\"A (IPv4 address)\",\"selected\":0},\"AAAA\":{\"value\":\"AAAA (IPv6 address)\",\"selected\":0},\"MX\":{\"value\":\"MX (Mail server)\",\"selected\":1}},\"mxprio\":\"10\",\"mx\":\"srv01.dev.sys-int.de\",\"server\":\"server01\",\"description\":\"srv01 - MX\"}}"
 	host := OverridesHost{}
 	err := json.Unmarshal([]byte(jsonString), &host)
@@ -45,7 +59,7 @@ func (s HostsOverridesTestSuite) TestFromJsonToOverridesHost() {
 	assert.Equal(s.T(), "server01", host.Host.Server)
 }
 
-func (s HostsOverridesTestSuite) TestFromJsonToOverridesHostDetails() {
+func (s OverridesTestSuite) TestFromJsonToOverridesHostDetails() {
 	jsonString := "{\"enabled\":\"1\",\"hostname\":\"srv01\",\"domain\":\"dev.sys-int.de\",\"rr\":{\"A\":{\"value\":\"A (IPv4 address)\",\"selected\":0},\"AAAA\":{\"value\":\"AAAA (IPv6 address)\",\"selected\":0},\"MX\":{\"value\":\"MX (Mail server)\",\"selected\":1}},\"mxprio\":\"10\",\"mx\":\"srv01.dev.sys-int.de\",\"server\":\"server01\",\"description\":\"srv01 - MX\"}"
 	host := OverridesHostDetails{}
 	err := json.Unmarshal([]byte(jsonString), &host)
@@ -58,8 +72,4 @@ func (s HostsOverridesTestSuite) TestFromJsonToOverridesHostDetails() {
 	assert.Equal(s.T(), MxPrio(10), host.Mxprio)
 	assert.Equal(s.T(), "srv01 - MX", host.Description)
 	assert.Equal(s.T(), "server01", host.Server)
-}
-
-func TestHostsOverridesTestSuite(t *testing.T) {
-	suite.Run(t, new(HostsOverridesTestSuite))
 }

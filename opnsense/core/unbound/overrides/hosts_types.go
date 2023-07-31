@@ -37,7 +37,7 @@ func (r *Rr) UnmarshalJSON(data []byte) error {
 }
 
 func (r *Rr) MarshalJSON() ([]byte, error) {
-	return []byte(*r), nil
+	return []byte(fmt.Sprintf(`"%s"`, *r)), nil
 }
 
 type MxPrio int

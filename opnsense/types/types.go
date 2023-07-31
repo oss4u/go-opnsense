@@ -11,10 +11,10 @@ func (b *Bool) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (h *Bool) MarshalJSON() ([]byte, error) {
-	if *h {
-		return []byte("1"), nil
+func (h Bool) MarshalJSON() ([]byte, error) {
+	if h {
+		return []byte(`"1"`), nil
 	} else {
-		return []byte("0"), nil
+		return []byte(`"0"`), nil
 	}
 }
