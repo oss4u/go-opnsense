@@ -11,8 +11,8 @@ import (
 
 type OverridesTestSuite struct {
 	suite.Suite
-	vagrantClient *vagrant.VagrantClient
-	ci            bool
+	vagrantClient   *vagrant.VagrantClient
+	integrationTest bool
 }
 
 func TestHostsOverridesTestSuite(t *testing.T) {
@@ -25,8 +25,11 @@ func (s *OverridesTestSuite) SetupSuite() {
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
-	if os.Getenv("CI") != "" {
-		s.ci = true
+	s.integrationTest = false
+	if os.Getenv("GITHUB_SHA") == "" {
+		s.integrationTest = true
+	}
+	if s.integrationTest {
 		s.vagrantClient, err = vagrant.NewVagrantClient("../../../../")
 		if err != nil {
 			panic(err)
@@ -45,7 +48,7 @@ func (s *OverridesTestSuite) SetupSuite() {
 }
 
 func (s *OverridesTestSuite) TearDownSuite() {
-	if !s.ci {
+	if s.integrationTest {
 		s.vagrantClient.Destroy()
 	}
 }

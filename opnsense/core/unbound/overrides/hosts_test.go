@@ -6,8 +6,8 @@ import (
 )
 
 func (s OverridesTestSuite) TestCreateUpdateDelete() {
-	if s.ci {
-		s.T().Skip("Missing credentials")
+	if !s.integrationTest {
+		s.T().Skip("CI Build - Skipping integration tests")
 	}
 	api := opnsense.GetOpnSenseClient("", "", "")
 	overrides := GetHostsOverrideApi(api)
