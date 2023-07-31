@@ -8,6 +8,7 @@ type OverridesAlias struct {
 	Alias OverridesAliasDetails `json:"alias"`
 }
 type OverridesAliasDetails struct {
+	Uuid        string     `json:"-"`
 	Enabled     types.Bool `json:"enabled"`
 	Host        string     `json:"host"`
 	Hostname    string     `json:"hostname"`

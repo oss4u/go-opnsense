@@ -10,7 +10,8 @@ func (s OverridesTestSuite) TestCreateUpdateDeleteAliases() {
 		s.T().Skip("CI Build - Skipping integration tests")
 	}
 	api := opnsense.GetOpnSenseClient("", "", "")
-	overrides := GetHostsOverrideApi(api)
+	hostsOverrideApi := GetHostsOverrideApi(api)
+	aliasOverrideApi := GetAliasesOverrideApi(api)
 	hostDetails := OverridesHostDetails{
 		Uuid:        "",
 		Enabled:     true,
@@ -21,13 +22,21 @@ func (s OverridesTestSuite) TestCreateUpdateDeleteAliases() {
 		Server:      "10.10.10.10",
 	}
 	host := OverridesHost{Host: hostDetails}
-	createdHost, _ := overrides.Create(&host)
+	createdHost, _ := hostsOverrideApi.Create(&host)
 	assert.NotNil(s.T(), createdHost)
-	createdHost.Host.Hostname = "456"
-	updatedHost, _ := overrides.Update(createdHost)
-	assert.NotNil(s.T(), updatedHost)
-	overrides.Delete(updatedHost)
-	unavailableHost, _ := overrides.Read(updatedHost.Host.Uuid)
+	alias := OverridesAlias{Alias: OverridesAliasDetails{
+		Enabled:     true,
+		Host:        createdHost.Host.Uuid,
+		Hostname:    "abc",
+		Domain:      "asdddd",
+		Description: "Alias",
+	}}
+	createdAlias, _ := aliasOverrideApi.Create(&alias)
+	createdAlias.Alias.Hostname = "456"
+	updatedAlias, _ := aliasOverrideApi.Update(createdAlias)
+	assert.NotNil(s.T(), updatedAlias)
+	aliasOverrideApi.Delete(updatedAlias)
+	unavailableHost, _ := aliasOverrideApi.Read(updatedAlias.Alias.Uuid)
 	assert.Nil(s.T(), unavailableHost)
 
 }

@@ -54,7 +54,7 @@ func (m MxPrio) MarshalJSON() ([]byte, error) {
 }
 
 type OverridesHostDetails struct {
-	Uuid        string     `json:"uuid,omitempty"`
+	Uuid        string     `json:"-"`
 	Enabled     types.Bool `json:"enabled"`
 	Hostname    string     `json:"hostname"`
 	Domain      string     `json:"domain"`
