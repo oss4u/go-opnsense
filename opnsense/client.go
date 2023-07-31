@@ -94,7 +94,6 @@ func (c *OpnSenseApi) NonModifyingRequest(module string, controller string, comm
 		url = fmt.Sprintf("%s/api/%s/%s/%s", c.address, module, controller, command)
 	}
 	res, err := request.Get(url)
-	fmt.Printf("res: %s", res.String())
 	if err != nil {
 		return res.String(), res.StatusCode(), err
 	}

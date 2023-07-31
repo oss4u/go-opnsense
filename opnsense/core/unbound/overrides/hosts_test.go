@@ -3,11 +3,10 @@ package overrides
 import (
 	"github.com/oss4u/go-opnsense/opnsense"
 	"github.com/stretchr/testify/assert"
-	"os"
 )
 
 func (s OverridesTestSuite) TestCreateUpdateDelete() {
-	if os.Getenv("OPNSENSE_ADDRESS") == "" {
+	if s.ci {
 		s.T().Skip("Missing credentials")
 	}
 	api := opnsense.GetOpnSenseClient("", "", "")

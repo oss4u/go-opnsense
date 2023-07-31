@@ -5,12 +5,14 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/suite"
 	"log"
+	"os"
 	"testing"
 )
 
 type OverridesTestSuite struct {
 	suite.Suite
 	vagrantClient *vagrant.VagrantClient
+	ci            bool
 }
 
 func TestHostsOverridesTestSuite(t *testing.T) {
@@ -23,22 +25,27 @@ func (s *OverridesTestSuite) SetupSuite() {
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
-	s.vagrantClient, err = vagrant.NewVagrantClient("../../../../")
-	if err != nil {
-		panic(err)
-	}
+	if os.Getenv("CI") != "" {
+		s.ci = true
+		s.vagrantClient, err = vagrant.NewVagrantClient("../../../../")
+		if err != nil {
+			panic(err)
+		}
 
-	upcmd := s.vagrantClient.Up()
-	upcmd.Verbose = true
-	if err := upcmd.Run(); err != nil {
-		panic(err)
-	}
-	if upcmd.Error != nil {
-		panic(err)
+		upcmd := s.vagrantClient.Up()
+		upcmd.Verbose = true
+		if err := upcmd.Run(); err != nil {
+			panic(err)
+		}
+		if upcmd.Error != nil {
+			panic(err)
+		}
 	}
 
 }
 
 func (s *OverridesTestSuite) TearDownSuite() {
-	s.vagrantClient.Destroy()
+	if !s.ci {
+		s.vagrantClient.Destroy()
+	}
 }

@@ -37,7 +37,6 @@ func (o OverridesHostsApi) Read(uuid string) (*OverridesHost, error) {
 	param := []string{}
 	param = append(param, uuid)
 	result, retCode, err := o.api.NonModifyingRequest(o.module, o.controller, "getHostOverride", param)
-	fmt.Printf("Result: %s", result)
 	if retCode == 200 {
 		if result == `[]` {
 			return nil, err
