@@ -18,40 +18,42 @@ func (o OverridesAliasesApi) Create(alias *OverridesAlias) (*OverridesAlias, err
 		return nil, err
 	}
 	request, err := o.api.ModifyingRequest(o.module, o.controller, "addHostAlias", string(data), []string{})
-	result := Result{}
-	json.Unmarshal([]byte(request), &result)
 	if err != nil {
-		fmt.Printf("Error: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("error creating alias: %w", err)
+	}
+	var result Result
+	if err := json.Unmarshal([]byte(request), &result); err != nil {
+		return nil, fmt.Errorf("error unmarshalling response: %w", err)
 	}
 	alias.Alias.Uuid = result.Uuid
 	return alias, nil
 }
 
 func (o OverridesAliasesApi) Read(uuid string) (*OverridesAlias, error) {
-	param := []string{}
-	param = append(param, uuid)
-	result, retCode, err := o.api.NonModifyingRequest(o.module, o.controller, "getHostAlias", param)
-	if retCode == 200 {
-		if result == `[]` {
-			return nil, err
-		}
-		host := OverridesAlias{}
-		json.Unmarshal([]byte(result), &host)
-		return &host, err
-	} else {
-		return nil, err
+	params := []string{uuid}
+	result, retCode, err := o.api.NonModifyingRequest(o.module, o.controller, "getHostAlias", params)
+	if err != nil {
+		return nil, fmt.Errorf("error reading alias: %w", err)
 	}
+	if retCode != 200 || result == `[]` {
+		return nil, fmt.Errorf("alias not found or invalid response code: %d", retCode)
+	}
+	var alias OverridesAlias
+	if err := json.Unmarshal([]byte(result), &alias); err != nil {
+		return nil, fmt.Errorf("error unmarshalling response: %w", err)
+	}
+	return &alias, nil
 }
 
 func (o OverridesAliasesApi) Update(alias *OverridesAlias) (*OverridesAlias, error) {
-	params := []string{}
-	params = append(params, alias.Alias.Uuid)
 	data, err := json.Marshal(alias)
 	if err != nil {
 		return nil, err
 	}
-	o.api.ModifyingRequest(o.module, o.controller, "setHostAlias", string(data), params)
+	params := []string{alias.Alias.Uuid}
+	if _, err := o.api.ModifyingRequest(o.module, o.controller, "setHostAlias", string(data), params); err != nil {
+		return nil, fmt.Errorf("error updating alias: %w", err)
+	}
 	return alias, nil
 }
 
@@ -60,8 +62,9 @@ func (o OverridesAliasesApi) Delete(alias *OverridesAlias) error {
 }
 
 func (o OverridesAliasesApi) DeleteByID(uuid string) error {
-	params := []string{}
-	params = append(params, uuid)
-	_, err := o.api.ModifyingRequest(o.module, o.controller, "delHostAlias", "", params)
-	return err
+	params := []string{uuid}
+	if _, err := o.api.ModifyingRequest(o.module, o.controller, "delHostAlias", "", params); err != nil {
+		return fmt.Errorf("error deleting alias: %w", err)
+	}
+	return nil
 }
