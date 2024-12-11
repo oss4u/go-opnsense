@@ -23,40 +23,42 @@ func (o OverridesHostsApi) Create(host *OverridesHost) (*OverridesHost, error) {
 		return nil, err
 	}
 	request, err := o.api.ModifyingRequest(o.module, o.controller, "addHostOverride", string(data), []string{})
-	result := Result{}
-	json.Unmarshal([]byte(request), &result)
 	if err != nil {
-		fmt.Printf("Error: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("error creating host: %w", err)
+	}
+	var result Result
+	if err := json.Unmarshal([]byte(request), &result); err != nil {
+		return nil, fmt.Errorf("error unmarshalling response: %w", err)
 	}
 	host.Host.Uuid = result.Uuid
 	return host, nil
 }
 
 func (o OverridesHostsApi) Read(uuid string) (*OverridesHost, error) {
-	param := []string{}
-	param = append(param, uuid)
-	result, retCode, err := o.api.NonModifyingRequest(o.module, o.controller, "getHostOverride", param)
-	if retCode == 200 {
-		if result == `[]` {
-			return nil, err
-		}
-		host := OverridesHost{}
-		json.Unmarshal([]byte(result), &host)
-		return &host, err
-	} else {
-		return nil, err
+	params := []string{uuid}
+	result, retCode, err := o.api.NonModifyingRequest(o.module, o.controller, "getHostOverride", params)
+	if err != nil {
+		return nil, fmt.Errorf("error reading host: %w", err)
 	}
+	if retCode != 200 || result == `[]` {
+		return nil, fmt.Errorf("host not found or invalid response code: %d", retCode)
+	}
+	var host OverridesHost
+	if err := json.Unmarshal([]byte(result), &host); err != nil {
+		return nil, fmt.Errorf("error unmarshalling response: %w", err)
+	}
+	return &host, nil
 }
 
 func (o OverridesHostsApi) Update(host *OverridesHost) (*OverridesHost, error) {
-	params := []string{}
-	params = append(params, host.Host.GetUUID())
 	data, err := json.Marshal(host)
 	if err != nil {
 		return nil, err
 	}
-	o.api.ModifyingRequest(o.module, o.controller, "setHostOverride", string(data), params)
+	params := []string{host.Host.GetUUID()}
+	if _, err := o.api.ModifyingRequest(o.module, o.controller, "setHostOverride", string(data), params); err != nil {
+		return nil, fmt.Errorf("error updating host: %w", err)
+	}
 	return host, nil
 }
 
@@ -65,8 +67,9 @@ func (o OverridesHostsApi) Delete(host *OverridesHost) error {
 }
 
 func (o OverridesHostsApi) DeleteByID(uuid string) error {
-	params := []string{}
-	params = append(params, uuid)
-	_, err := o.api.ModifyingRequest(o.module, o.controller, "delHostOverride", "", params)
-	return err
+	params := []string{uuid}
+	if _, err := o.api.ModifyingRequest(o.module, o.controller, "delHostOverride", "", params); err != nil {
+		return fmt.Errorf("error deleting host: %w", err)
+	}
+	return nil
 }
