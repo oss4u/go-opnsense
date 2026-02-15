@@ -61,6 +61,57 @@ Run only Unbound tests:
 go test ./opnsense/core/unbound/...
 ```
 
+## Development
+
+### 1) Install development hooks
+
+Install `pre-commit` (for example via `pipx`):
+
+```bash
+pipx install pre-commit
+```
+
+Install repository hooks:
+
+```bash
+make pre-commit-install
+```
+
+### 2) Run checks locally before pushing
+
+Run the same lint checks as configured in CI:
+
+```bash
+make pre-commit-run
+```
+
+Run the local Dagger CI pipeline (tidy + build + tests):
+
+```bash
+make ci
+```
+
+### 3) Commit message policy
+
+This repository enforces Conventional Commits via `commit-msg` hook.
+
+Examples:
+
+- `feat(unbound): add settings toggle wrapper`
+- `fix(overrides): handle empty get response`
+- `chore(ci): pin golangci-lint version`
+
+### 4) Branch/CI behavior
+
+- Push to `develop`:
+    - `develop-lint` (`golangci-lint`)
+    - `develop-build` (Dagger build)
+    - `develop-test` (Dagger tests, after build)
+- Pull request to `main`:
+    - `build-and-test` (Dagger CI)
+- Push to `main`:
+    - `build-and-test` + `release`
+
 ## Usage
 
 ### Create client

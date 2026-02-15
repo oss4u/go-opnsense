@@ -47,6 +47,13 @@ _ci:
 	go build -v ./...
 	go test -v ./...
 
+pre-commit-install:
+	pre-commit install
+	pre-commit install --hook-type commit-msg
+
+pre-commit-run:
+	pre-commit run --all-files
+
 release:
 	$(DAGGER) run -- make _release
 
