@@ -21,7 +21,7 @@ func newContractServer() (*httptest.Server, *capturedRequest) {
 	captured := &capturedRequest{}
 	mu := &sync.Mutex{}
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
 		captured.Method = r.Method
 		captured.Path = r.URL.Path

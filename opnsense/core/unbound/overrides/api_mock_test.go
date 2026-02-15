@@ -113,7 +113,7 @@ func newMockOpnSenseServer(t *testing.T) *httptest.Server {
 		_, _ = io.WriteString(w, `{"error":"unsupported endpoint"}`)
 	})
 
-	return httptest.NewServer(handler)
+	return httptest.NewTLSServer(handler)
 }
 
 func TestHostsOverrideApi_CRUD_WithMockedOpnSenseEndpoints(t *testing.T) {

@@ -12,11 +12,7 @@ linters:
     - staticcheck
     - revive
     - ineffassign
-    - typecheck
     - unused
-    - gosimple
-    - gofmt
-    - goimports
     - misspell
     - unconvert
 
