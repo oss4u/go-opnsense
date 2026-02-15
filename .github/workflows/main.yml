@@ -1,25 +1,99 @@
-name: main
+name: ci
 on:
   push:
-    branches:
-      - main
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
 jobs:
-  version:
+  build-and-test:
     runs-on: ubuntu-latest
-    name: build
+    name: build-and-test
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v4
+
+      - uses: actions/setup-go@v5
         with:
-          go-version: '1.20'
-      - name: Build
-        run: |
-          env
-          go build -v ./...
-      - name: Test
-        run: go test -v ./...
+          go-version-file: go.mod
+
+      - name: Setup Dagger
+        uses: dagger/dagger-for-github@v7
+
+      - name: Dagger version
+        run: dagger version
+
+      - name: CI (Dagger)
+        run: make ci
+
+  develop-lint:
+    runs-on: ubuntu-latest
+    name: develop-lint
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+
+  develop-build:
+    runs-on: ubuntu-latest
+    name: develop-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Setup Dagger
+        uses: dagger/dagger-for-github@v7
+
+      - name: Build (Dagger)
+        run: make build
+
+  develop-test:
+    runs-on: ubuntu-latest
+    name: develop-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    needs: [ develop-build ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Setup Dagger
+        uses: dagger/dagger-for-github@v7
+
+      - name: Test (Dagger)
+        run: make test
+
+  release:
+    runs-on: ubuntu-latest
+    name: release
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Dagger
+        uses: dagger/dagger-for-github@v7
+
+      - name: Dagger version
+        run: dagger version
+
       - name: Semver release
         id: release
         uses: cocogitto/cocogitto-action@v3.5
