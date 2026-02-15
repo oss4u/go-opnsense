@@ -5,14 +5,10 @@ import (
 	"github.com/kinbiko/jsonassert"
 	"github.com/oss4u/go-opnsense/opnsense/types"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
+	"testing"
 )
 
-type HostsOverridesTestSuite struct {
-	suite.Suite
-}
-
-func (s OverridesTestSuite) TestToJson() {
+func TestToJson(t *testing.T) {
 	hostDetails := OverridesHostDetails{
 		Uuid:        "",
 		Enabled:     true,
@@ -25,11 +21,11 @@ func (s OverridesTestSuite) TestToJson() {
 	host := OverridesHost{Host: hostDetails}
 	//json := host.Host.ConvertToJson()
 	data, err := json.Marshal(host)
-	assert.Nil(s.T(), err)
-	ja := jsonassert.New(s.T())
+	assert.Nil(t, err)
+	ja := jsonassert.New(t)
 	ja.Assertf(string(data), `
 	{
-		"host": 
+		"host":
 			{
 				"enabled": "1",
 				"hostname": "123",
@@ -43,45 +39,45 @@ func (s OverridesTestSuite) TestToJson() {
 
 }
 
-func (s OverridesTestSuite) TestFromJsonToOverridesHost() {
+func TestFromJsonToOverridesHost(t *testing.T) {
 	jsonString := "{\"host\":{\"enabled\":\"1\",\"hostname\":\"srv01\",\"domain\":\"dev.sys-int.de\",\"rr\":{\"A\":{\"value\":\"A (IPv4 address)\",\"selected\":0},\"AAAA\":{\"value\":\"AAAA (IPv6 address)\",\"selected\":0},\"MX\":{\"value\":\"MX (Mail server)\",\"selected\":1}},\"mxprio\":\"10\",\"mx\":\"srv01.dev.sys-int.de\",\"server\":\"server01\",\"description\":\"srv01 - MX\"}}"
 	host := OverridesHost{}
 	err := json.Unmarshal([]byte(jsonString), &host)
-	assert.Nil(s.T(), err)
-	assert.NotNil(s.T(), host.Host)
-	assert.Equal(s.T(), types.Bool(true), host.Host.Enabled)
-	assert.Equal(s.T(), "srv01", host.Host.Hostname)
-	assert.Equal(s.T(), "dev.sys-int.de", host.Host.Domain)
-	assert.Equal(s.T(), Rr("MX"), host.Host.Rr)
-	assert.Equal(s.T(), "srv01.dev.sys-int.de", host.Host.Mx)
-	assert.Equal(s.T(), MxPrio(10), host.Host.Mxprio)
-	assert.Equal(s.T(), "srv01 - MX", host.Host.Description)
-	assert.Equal(s.T(), "server01", host.Host.Server)
+	assert.Nil(t, err)
+	assert.NotNil(t, host.Host)
+	assert.Equal(t, types.Bool(true), host.Host.Enabled)
+	assert.Equal(t, "srv01", host.Host.Hostname)
+	assert.Equal(t, "dev.sys-int.de", host.Host.Domain)
+	assert.Equal(t, Rr("MX"), host.Host.Rr)
+	assert.Equal(t, "srv01.dev.sys-int.de", host.Host.Mx)
+	assert.Equal(t, MxPrio(10), host.Host.Mxprio)
+	assert.Equal(t, "srv01 - MX", host.Host.Description)
+	assert.Equal(t, "server01", host.Host.Server)
 }
 
-func (s OverridesTestSuite) TestFromJsonToOverridesHostDetails() {
+func TestFromJsonToOverridesHostDetails(t *testing.T) {
 	jsonString := "{\"enabled\":\"1\",\"hostname\":\"srv01\",\"domain\":\"dev.sys-int.de\",\"rr\":{\"A\":{\"value\":\"A (IPv4 address)\",\"selected\":0},\"AAAA\":{\"value\":\"AAAA (IPv6 address)\",\"selected\":0},\"MX\":{\"value\":\"MX (Mail server)\",\"selected\":1}},\"mxprio\":\"10\",\"mx\":\"srv01.dev.sys-int.de\",\"server\":\"server01\",\"description\":\"srv01 - MX\"}"
 	host := OverridesHostDetails{}
 	err := json.Unmarshal([]byte(jsonString), &host)
-	assert.Nil(s.T(), err)
-	assert.Equal(s.T(), types.Bool(true), host.Enabled)
-	assert.Equal(s.T(), "srv01", host.Hostname)
-	assert.Equal(s.T(), "dev.sys-int.de", host.Domain)
-	assert.Equal(s.T(), Rr("MX"), host.Rr)
-	assert.Equal(s.T(), "srv01.dev.sys-int.de", host.Mx)
-	assert.Equal(s.T(), MxPrio(10), host.Mxprio)
-	assert.Equal(s.T(), "srv01 - MX", host.Description)
-	assert.Equal(s.T(), "server01", host.Server)
+	assert.Nil(t, err)
+	assert.Equal(t, types.Bool(true), host.Enabled)
+	assert.Equal(t, "srv01", host.Hostname)
+	assert.Equal(t, "dev.sys-int.de", host.Domain)
+	assert.Equal(t, Rr("MX"), host.Rr)
+	assert.Equal(t, "srv01.dev.sys-int.de", host.Mx)
+	assert.Equal(t, MxPrio(10), host.Mxprio)
+	assert.Equal(t, "srv01 - MX", host.Description)
+	assert.Equal(t, "server01", host.Server)
 }
 
-func (s OverridesTestSuite) TestMxPrioToInt() {
+func TestMxPrioToInt(t *testing.T) {
 	var cut MxPrio
 	cut = 101
-	assert.Equal(s.T(), 101, cut.Int())
+	assert.Equal(t, 101, cut.Int())
 }
 
-func (s OverridesTestSuite) TestRrToString() {
+func TestRrToString(t *testing.T) {
 	var cut Rr
 	cut = "AAAA"
-	assert.Equal(s.T(), "AAAA", cut.String())
+	assert.Equal(t, "AAAA", cut.String())
 }
