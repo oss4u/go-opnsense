@@ -3,9 +3,10 @@ package overrides
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/oss4u/go-opnsense/opnsense/types"
 	"strconv"
 	"strings"
+
+	"github.com/oss4u/go-opnsense/opnsense/types"
 )
 
 type ConvertableToJson interface {
@@ -82,6 +83,6 @@ func (h OverridesHostDetails) GetUUID() string {
 	return h.Uuid
 }
 
-func (h OverridesHostDetails) SetUUID(uuid string) {
+func (h *OverridesHostDetails) SetUUID(uuid string) {
 	h.Uuid = uuid
 }

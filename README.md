@@ -262,6 +262,27 @@ All OPNsense API calls are serialized in the client to avoid parallel request is
 - Contract-style tests for Unbound endpoints in `opnsense/core/unbound/unbound_contract_test.go`
 - Mocked endpoint CRUD tests for host overrides and aliases in `opnsense/core/unbound/overrides/api_mock_test.go`
 
+## Linting policy
+
+This project uses `golangci-lint` v2 with config version `2` from `.golangci.yml`.
+
+Recommended local commands:
+
+```bash
+golangci-lint fmt --config=.golangci.yml
+golangci-lint run --config=.golangci.yml
+```
+
+Notes about `revive` exclusions:
+
+- Some `revive` style findings are intentionally excluded to preserve public API compatibility and avoid breaking downstream users.
+- Specifically, we ignore:
+    - package comment requirements on all packages
+    - exported symbol comment requirements
+    - naming/stuttering suggestions for existing exported API names
+    - var-naming recommendations that would force broad API renames
+- Functional and correctness-oriented checks (`govet`, `errcheck`, `staticcheck`, `ineffassign`, `unused`, `unconvert`, `misspell`) remain enabled.
+
 ## Notes
 
 - This project currently documents and supports only the implemented **Unbound** API resources.

@@ -15,6 +15,23 @@ linters:
     - unused
     - misspell
     - unconvert
+  exclusions:
+    rules:
+      - linters:
+          - revive
+        text: "package-comments:"
+      - linters:
+          - revive
+        text: "should have comment or be unexported"
+      - linters:
+          - revive
+        text: "var-naming:"
+      - linters:
+          - revive
+        text: "type name will be used as"
+      - linters:
+          - revive
+        text: "exported const .* should have comment"
 
 issues:
   max-issues-per-linter: 0
