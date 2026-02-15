@@ -8,15 +8,6 @@ import (
 	"sync"
 )
 
-<<<<<<< Updated upstream
-var (
-	createLock  = &sync.Mutex{}
-	modifyLock  = &sync.Mutex{}
-	opnSenseApi *OpnSenseApi
-)
-
-func GetOpnSenseClient(host, key, secret string) *OpnSenseApi {
-=======
 var createLock = &sync.Mutex{}
 var requestLock = &sync.Mutex{}
 var opnSenseApi *OpnSenseApi
@@ -36,7 +27,6 @@ func NewOpnSenseClient(host string, key string, secret string) *OpnSenseApi {
 }
 
 func GetOpnSenseClient(host string, key string, secret string) *OpnSenseApi {
->>>>>>> Stashed changes
 	if opnSenseApi == nil {
 		createLock.Lock()
 		defer createLock.Unlock()
@@ -52,39 +42,24 @@ type OpnSenseApi struct {
 	secret  string
 }
 
-func (c *OpnSenseApi) getClient() *resty.Client {
-	if c.client == nil {
-		c.client = resty.New()
-		c.client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+func (c *OpnSenseApi) get_client() *resty.Client {
+	if c.client != nil {
+		return c.client
 	}
+	c.client = resty.New()
+	c.client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	return c.client
 }
 
-<<<<<<< Updated upstream
-func (c *OpnSenseApi) ModifyingRequest(module, controller, command, data string, params []string) (string, error) {
-	client := c.getClient()
-	modifyLock.Lock()
-	defer modifyLock.Unlock()
-
-	url := fmt.Sprintf("%s/api/%s/%s/%s", c.address, module, controller, command)
-	if len(params) > 0 {
-		url += "/" + fmt.Sprintf("%s", params)
-	}
-
-=======
 func (c *OpnSenseApi) ModifyingRequest(module string, controller string, command string, data string, params []string) (string, error) {
 	client := c.get_client()
 	requestLock.Lock()
 	defer requestLock.Unlock()
->>>>>>> Stashed changes
+	url := ""
 	request := client.R().
 		SetHeader("Content-Type", "application/json").
-		SetBasicAuth(c.key, c.secret).
-		SetBody(data)
+		SetBasicAuth(c.key, c.secret)
 
-<<<<<<< Updated upstream
-	res, err := request.Post(url)
-=======
 	if len(params) > 0 {
 		p := ""
 		for _, v := range params {
@@ -100,28 +75,14 @@ func (c *OpnSenseApi) ModifyingRequest(module string, controller string, command
 	} else {
 		request = request.SetBody(`{}`)
 	}
-	res, err := request.
-		Post(url)
->>>>>>> Stashed changes
+	res, err := request.Post(url)
 	if err != nil {
-		return "", err
+		return res.String(), err
 	}
+
 	return res.String(), nil
 }
 
-<<<<<<< Updated upstream
-func (c *OpnSenseApi) NonModifyingRequest(module, controller, command string, params []string) (string, int, error) {
-	client := c.getClient()
-
-	url := fmt.Sprintf("%s/api/%s/%s/%s", c.address, module, controller, command)
-	if len(params) > 0 {
-		url += "/" + fmt.Sprintf("%s", params)
-	}
-
-	request := client.R().
-		SetBasicAuth(c.key, c.secret)
-
-=======
 func (c *OpnSenseApi) NonModifyingRequest(module string, controller string, command string, params []string) (string, int, error) {
 	client := c.get_client()
 	requestLock.Lock()
@@ -138,10 +99,9 @@ func (c *OpnSenseApi) NonModifyingRequest(module string, controller string, comm
 	} else {
 		url = fmt.Sprintf("%s/api/%s/%s/%s", c.address, module, controller, command)
 	}
->>>>>>> Stashed changes
 	res, err := request.Get(url)
 	if err != nil {
-		return "", res.StatusCode(), err
+		return res.String(), res.StatusCode(), err
 	}
 	return res.String(), res.StatusCode(), nil
 }
