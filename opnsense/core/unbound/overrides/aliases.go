@@ -18,6 +18,8 @@ func (o OverridesAliasesApi) Create(alias *OverridesAlias) (*OverridesAlias, err
 		return nil, err
 	}
 	request, err := o.api.ModifyingRequest(o.module, o.controller, "add_host_alias", string(data), []string{})
+	request, err := o.api.ModifyingRequest(o.module, o.controller, "addHostAlias", string(data), []string{})
+
 	if err != nil {
 		return nil, fmt.Errorf("error creating alias: %w", err)
 	}
@@ -44,6 +46,14 @@ func (o OverridesAliasesApi) Read(uuid string) (*OverridesAlias, error) {
 	if retCode != 200 {
 		return nil, fmt.Errorf("alias not found or invalid response code: %d", retCode)
 	}
+	params := []string{uuid}
+	result, retCode, err := o.api.NonModifyingRequest(o.module, o.controller, "getHostAlias", params)
+	if err != nil {
+		return nil, fmt.Errorf("error reading alias: %w", err)
+	}
+	if retCode != 200 || result == `[]` {
+		return nil, fmt.Errorf("alias not found or invalid response code: %d", retCode)
+	}
 	var alias OverridesAlias
 	if err := json.Unmarshal([]byte(result), &alias); err != nil {
 		return nil, fmt.Errorf("error unmarshalling response: %w", err)
@@ -60,6 +70,10 @@ func (o OverridesAliasesApi) Update(alias *OverridesAlias) (*OverridesAlias, err
 	if _, err := o.api.ModifyingRequest(o.module, o.controller, "set_host_alias", string(data), params); err != nil {
 		return nil, fmt.Errorf("error updating alias: %w", err)
 	}
+	params := []string{alias.Alias.Uuid}
+	if _, err := o.api.ModifyingRequest(o.module, o.controller, "setHostAlias", string(data), params); err != nil {
+		return nil, fmt.Errorf("error updating alias: %w", err)
+	}
 	return alias, nil
 }
 
@@ -70,6 +84,11 @@ func (o OverridesAliasesApi) Delete(alias *OverridesAlias) error {
 func (o OverridesAliasesApi) DeleteByID(uuid string) error {
 	params := []string{uuid}
 	if _, err := o.api.ModifyingRequest(o.module, o.controller, "del_host_alias", "", params); err != nil {
+		return fmt.Errorf("error deleting alias: %w", err)
+	}
+	return nil
+	params := []string{uuid}
+	if _, err := o.api.ModifyingRequest(o.module, o.controller, "delHostAlias", "", params); err != nil {
 		return fmt.Errorf("error deleting alias: %w", err)
 	}
 	return nil

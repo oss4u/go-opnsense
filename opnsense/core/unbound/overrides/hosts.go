@@ -23,6 +23,8 @@ func (o OverridesHostsApi) Create(host *OverridesHost) (*OverridesHost, error) {
 		return nil, err
 	}
 	request, err := o.api.ModifyingRequest(o.module, o.controller, "add_host_override", string(data), []string{})
+	request, err := o.api.ModifyingRequest(o.module, o.controller, "addHostOverride", string(data), []string{})
+
 	if err != nil {
 		return nil, fmt.Errorf("error creating host: %w", err)
 	}
@@ -49,6 +51,15 @@ func (o OverridesHostsApi) Read(uuid string) (*OverridesHost, error) {
 	if retCode != 200 {
 		return nil, fmt.Errorf("host not found or invalid response code: %d", retCode)
 	}
+	params := []string{uuid}
+	result, retCode, err := o.api.NonModifyingRequest(o.module, o.controller, "getHostOverride", params)
+	if err != nil {
+		return nil, fmt.Errorf("error reading host: %w", err)
+	}
+	if retCode != 200 || result == `[]` {
+		return nil, fmt.Errorf("host not found or invalid response code: %d", retCode)
+	}
+
 	var host OverridesHost
 	if err := json.Unmarshal([]byte(result), &host); err != nil {
 		return nil, fmt.Errorf("error unmarshalling response: %w", err)
@@ -65,6 +76,10 @@ func (o OverridesHostsApi) Update(host *OverridesHost) (*OverridesHost, error) {
 	if _, err := o.api.ModifyingRequest(o.module, o.controller, "set_host_override", string(data), params); err != nil {
 		return nil, fmt.Errorf("error updating host: %w", err)
 	}
+	params := []string{host.Host.GetUUID()}
+	if _, err := o.api.ModifyingRequest(o.module, o.controller, "setHostOverride", string(data), params); err != nil {
+		return nil, fmt.Errorf("error updating host: %w", err)
+	}
 	return host, nil
 }
 
@@ -75,6 +90,11 @@ func (o OverridesHostsApi) Delete(host *OverridesHost) error {
 func (o OverridesHostsApi) DeleteByID(uuid string) error {
 	params := []string{uuid}
 	if _, err := o.api.ModifyingRequest(o.module, o.controller, "del_host_override", "", params); err != nil {
+		return fmt.Errorf("error deleting host: %w", err)
+	}
+	return nil
+	params := []string{uuid}
+	if _, err := o.api.ModifyingRequest(o.module, o.controller, "delHostOverride", "", params); err != nil {
 		return fmt.Errorf("error deleting host: %w", err)
 	}
 	return nil
