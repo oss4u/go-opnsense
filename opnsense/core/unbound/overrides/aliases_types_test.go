@@ -2,9 +2,10 @@ package overrides
 
 import (
 	"encoding/json"
+	"testing"
+
 	"github.com/oss4u/go-opnsense/opnsense/types"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestFromJsonToOverridesAlias(t *testing.T) {

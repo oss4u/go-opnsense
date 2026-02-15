@@ -2,10 +2,11 @@ package overrides
 
 import (
 	"encoding/json"
+	"testing"
+
 	"github.com/kinbiko/jsonassert"
 	"github.com/oss4u/go-opnsense/opnsense/types"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestToJson(t *testing.T) {
@@ -71,13 +72,11 @@ func TestFromJsonToOverridesHostDetails(t *testing.T) {
 }
 
 func TestMxPrioToInt(t *testing.T) {
-	var cut MxPrio
-	cut = 101
+	cut := MxPrio(101)
 	assert.Equal(t, 101, cut.Int())
 }
 
 func TestRrToString(t *testing.T) {
-	var cut Rr
-	cut = "AAAA"
+	cut := Rr("AAAA")
 	assert.Equal(t, "AAAA", cut.String())
 }
