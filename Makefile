@@ -5,8 +5,6 @@ init:
 
 _init:
 	go mod tidy
-#	go mod verify
-#	go mod vendor
 
 test:
 	$(DAGGER) run -- make _test
