@@ -103,3 +103,4 @@ go.work
 .vagrant
 
 .DS_Store
+.envrc

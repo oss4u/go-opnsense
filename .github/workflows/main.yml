@@ -1,14 +1,15 @@
 name: ci
+
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+
 jobs:
-  build-and-test:
+  ci:
     runs-on: ubuntu-latest
-    name: build-and-test
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    name: ci
     steps:
       - uses: actions/checkout@v4
         with:
@@ -18,71 +19,45 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Setup task
+        uses: arduino/setup-task@v2
+
       - name: Setup Dagger
         uses: dagger/dagger-for-github@v7
 
       - name: Dagger version
         run: dagger version
 
-      - name: CI (Dagger)
-        run: make ci
+      - name: Run CI task via Dagger
+        run: dagger run -- task ci
 
-  develop-lint:
+  pact-tests:
     runs-on: ubuntu-latest
-    name: develop-lint
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    name: pact-tests
+    needs: [ci]
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v7
-        with:
-          version: v2.9.0
-          args: --config=.golangci.yml
-
-  develop-build:
-    runs-on: ubuntu-latest
-    name: develop-build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
+      - name: Setup task
+        uses: arduino/setup-task@v2
 
       - name: Setup Dagger
         uses: dagger/dagger-for-github@v7
 
-      - name: Build (Dagger)
-        run: make build
-
-  develop-test:
-    runs-on: ubuntu-latest
-    name: develop-test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-    needs: [ develop-build ]
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-
-      - name: Setup Dagger
-        uses: dagger/dagger-for-github@v7
-
-      - name: Test (Dagger)
-        run: make test
+      - name: Run pact tests task via Dagger
+        run: dagger run -- task test:pact
 
   release:
     runs-on: ubuntu-latest
     name: release
-    needs: build-and-test
+    needs: [ci]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4

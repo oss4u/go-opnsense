@@ -1,3 +1,5 @@
 [tools]
 go = "v1.26"
 golangci-lint = "v2.9.0"
+python = "3.12"
+pulumi = "3.134.0"

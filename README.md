@@ -55,6 +55,13 @@ Run all tests:
 go test ./...
 ```
 
+Or use Taskfile commands:
+
+```bash
+task build
+task test
+```
+
 Run only Unbound tests:
 
 ```bash
@@ -82,13 +89,19 @@ make pre-commit-install
 Run the same lint checks as configured in CI:
 
 ```bash
-make pre-commit-run
+task pre-commit:run
 ```
 
-Run the local Dagger CI pipeline (tidy + build + tests):
+Run the local CI task (tidy + lint + build + tests):
 
 ```bash
-make ci
+task ci
+```
+
+Run the same CI task in an isolated Dagger environment:
+
+```bash
+dagger run -- task ci
 ```
 
 ### 3) Commit message policy
@@ -104,13 +117,42 @@ Examples:
 ### 4) Branch/CI behavior
 
 - Push to `develop`:
-    - `develop-lint` (`golangci-lint`)
-    - `develop-build` (Dagger build)
-    - `develop-test` (Dagger tests, after build)
+    - `ci` (runs `dagger run -- task ci`)
 - Pull request to `main`:
-    - `build-and-test` (Dagger CI)
+    - `ci`
+    - `pact-tests` (runs `dagger run -- task test:pact`)
 - Push to `main`:
-    - `build-and-test` + `release`
+    - `ci`
+    - `pact-tests`
+    - `release`
+
+## Taskfile commands
+
+This repository now uses `Taskfile.yml` as the primary command runner.
+
+Core tasks:
+
+- `task init` — `go mod tidy`
+- `task lint` — run `golangci-lint` with `.golangci.yml`
+- `task build` — `go build -v ./...`
+- `task test` — `go test ./...`
+- `task test:ci` — CI-mode tests
+- `task ci` — full pipeline (`init`, `lint`, `build`, `test:ci`)
+- `task pact:install` — install Pact FFI runtime to `.pact/lib`
+- `task test:pact` — run `go test -tags pact ./...`
+
+## Pact runtime notes
+
+Pact consumer tests require the native `libpact_ffi` library.
+
+Local setup:
+
+```bash
+task pact:install
+task test:pact
+```
+
+In CI, the `pact-tests` job runs the same `Taskfile` task through Dagger.
 
 ## Usage
 
