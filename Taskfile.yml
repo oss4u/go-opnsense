@@ -1,0 +1,67 @@
+version: '3'
+
+tasks:
+  init:
+    desc: Prepare Go module dependencies
+    cmds:
+      - go mod tidy
+
+  build:
+    desc: Build all Go packages
+    cmds:
+      - go build -v ./...
+
+  test:
+    desc: Run unit and integration tests
+    cmds:
+      - go test ./...
+
+  test:ci:
+    desc: Run tests in CI mode
+    env:
+      CI: "true"
+    cmds:
+      - go test ./...
+
+  lint:
+    desc: Run golangci-lint with repository configuration
+    cmds:
+      - golangci-lint run --config=.golangci.yml
+
+  fmt:lint:
+    desc: Apply golangci-lint formatters
+    cmds:
+      - golangci-lint fmt --config=.golangci.yml
+
+  pre-commit:install:
+    desc: Install pre-commit hooks
+    cmds:
+      - pre-commit install
+      - pre-commit install --hook-type commit-msg
+
+  pre-commit:run:
+    desc: Run all pre-commit hooks
+    cmds:
+      - pre-commit run --all-files
+
+  pact:install:
+    desc: Install Pact FFI runtime into local repo folder
+    cmds:
+      - mkdir -p .pact/lib
+      - go run github.com/pact-foundation/pact-go/v2@v2.4.2 install --libDir .pact/lib
+
+  test:pact:
+    desc: Run pact-tagged tests
+    deps:
+      - pact:install
+    cmds:
+      - cp .pact/lib/libpact_ffi.dylib /tmp/libpact_ffi.dylib
+      - go test -tags pact ./...
+
+  ci:
+    desc: Full CI pipeline (init, lint, build, tests)
+    cmds:
+      - task: init
+      - task: lint
+      - task: build
+      - task: test:ci
