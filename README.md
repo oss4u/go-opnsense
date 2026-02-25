@@ -145,6 +145,14 @@ Core tasks:
 
 Pact consumer tests require the native `libpact_ffi` library.
 
+The Taskfile handles platform-specific runtime names automatically:
+
+- macOS: `libpact_ffi.dylib`
+- Linux: `libpact_ffi.so` (or versioned `libpact_ffi.so.*`)
+
+`task pact:install` forces installation into `.pact/lib`, and `task test:pact`
+resolves the correct library file before running `go test -tags pact ./...`.
+
 Local setup:
 
 ```bash

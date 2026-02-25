@@ -48,15 +48,41 @@ tasks:
     desc: Install Pact FFI runtime into local repo folder
     cmds:
       - mkdir -p .pact/lib
-      - go run github.com/pact-foundation/pact-go/v2@v2.4.2 install --libDir .pact/lib
+      - go run github.com/pact-foundation/pact-go/v2@v2.4.2 install --force --libDir .pact/lib
 
   test:pact:
     desc: Run pact-tagged tests
     deps:
       - pact:install
     cmds:
-      - cp .pact/lib/libpact_ffi.dylib /tmp/libpact_ffi.dylib
-      - go test -tags pact ./...
+      - |
+        set -eu
+        lib_file="$(find .pact/lib -maxdepth 1 -type f \( -name 'libpact_ffi.dylib' -o -name 'libpact_ffi.so' -o -name 'libpact_ffi.so.*' \) | head -n 1)"
+        if [ -z "$lib_file" ]; then
+          echo "libpact_ffi was not found in .pact/lib"
+          ls -la .pact/lib || true
+          exit 1
+        fi
+
+        lib_base="$(basename "$lib_file")"
+        cp "$lib_file" "/tmp/$lib_base"
+
+        case "$lib_base" in
+          *.dylib)
+            ln -sf "/tmp/$lib_base" /tmp/libpact_ffi.dylib
+            export DYLD_LIBRARY_PATH="/tmp:${PWD}/.pact/lib:${DYLD_LIBRARY_PATH:-}"
+            ;;
+          *.so)
+            ln -sf "/tmp/$lib_base" /tmp/libpact_ffi.so
+            export LD_LIBRARY_PATH="/tmp:${PWD}/.pact/lib:${LD_LIBRARY_PATH:-}"
+            ;;
+          *.so.*)
+            ln -sf "/tmp/$lib_base" /tmp/libpact_ffi.so
+            export LD_LIBRARY_PATH="/tmp:${PWD}/.pact/lib:${LD_LIBRARY_PATH:-}"
+            ;;
+        esac
+
+        go test -tags pact ./...
 
   ci:
     desc: Full CI pipeline (init, lint, build, tests)
