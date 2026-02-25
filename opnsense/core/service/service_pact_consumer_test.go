@@ -33,9 +33,8 @@ func TestCoreServicePactConsumer_Search(t *testing.T) {
 		WithRequest(consumer.Method("POST"), "/api/core/service/search", func(builder *consumer.V2RequestBuilder) {
 			builder.Header("Content-Type", matchers.String("application/json"))
 			builder.JSONBody(map[string]any{
-				"current":      matchers.Like(1),
-				"rowCount":     matchers.Like(7),
-				"searchPhrase": matchers.Like(""),
+				"current":  matchers.Like(1),
+				"rowCount": matchers.Like(7),
 			})
 		}).
 		WillRespondWith(200, func(builder *consumer.V2ResponseBuilder) {
@@ -44,10 +43,10 @@ func TestCoreServicePactConsumer_Search(t *testing.T) {
 				"total":    matchers.Like(1),
 				"rowCount": matchers.Like(7),
 				"current":  matchers.Like(1),
-				"rows": matchers.EachLike(map[string]any{
-					"id":      matchers.Like("configd"),
-					"running": matchers.Like(1),
-				}, 1),
+				"rows": []map[string]any{{
+					"id":      "configd",
+					"running": 1,
+				}},
 			})
 		}).
 		ExecuteTest(t, func(config consumer.MockServerConfig) error {
