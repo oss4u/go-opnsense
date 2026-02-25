@@ -2,9 +2,8 @@ name: ci
 
 on:
   push:
-    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
   ci:
@@ -53,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     name: pact-tests
     needs: [ci]
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@v4
         with:
