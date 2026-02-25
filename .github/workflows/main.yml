@@ -121,7 +121,8 @@ jobs:
           git-user: 'version'
           git-user-email: 'info@sys-int.de'
 
-      - name: Automatic Rebase
-        uses: cirrus-actions/rebase@1.8
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Merge main into develop
+        run: |
+          git checkout develop
+          git merge origin/main
+          git push origin develop
