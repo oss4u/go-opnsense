@@ -122,6 +122,7 @@ jobs:
           git-user-email: 'info@sys-int.de'
 
       - name: Merge main into develop
+        if: steps.release.outputs.version != ''
         run: |
           git checkout develop
           git merge origin/main
