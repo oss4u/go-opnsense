@@ -154,6 +154,18 @@ tasks:
     cmds:
       - dagger run -- mise exec -- task test:pact:local
 
+  test:manual:local:
+    desc: Run manual integration tests against a real OPNsense instance
+    cmds:
+      - go test -tags manual ./...
+
+  test:manual:
+    desc: Run manual integration tests via Dagger
+    deps:
+      - dagger:login
+    cmds:
+      - dagger run -- mise exec -- task test:manual:local
+
   ci:local:
     cmds:
       - task: init:local

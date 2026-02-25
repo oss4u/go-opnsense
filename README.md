@@ -70,6 +70,24 @@ Run only Unbound tests:
 go test ./opnsense/core/unbound/...
 ```
 
+Run manual integration tests against a real OPNsense instance:
+
+```bash
+go test -tags manual ./...
+```
+
+or via Taskfile:
+
+```bash
+task test:manual:local
+```
+
+Optional Dagger wrapper:
+
+```bash
+task test:manual
+```
+
 ## Development
 
 ### 1) Install development hooks
@@ -145,8 +163,29 @@ Core tasks:
 - `task pact:ci` — Pact pipeline in Dagger
 - `task pact:install` — install Pact FFI runtime to `.pact/lib`
 - `task test:pact` — run `go test -tags pact ./...`
+- `task test:manual:local` — run `go test -tags manual ./...` against a real OPNsense instance
+- `task test:manual` — run manual tests in Dagger
 - `task release` — build release artifacts via Dagger
 - `task vagrant:start|stop|destroy` — local Vagrant helper tasks
+
+### Manual integration test environment
+
+Required variables:
+
+```bash
+export OPNSENSE_ADDRESS="https://<your-opnsense-host>"
+export OPNSENSE_KEY="<api-key>"
+export OPNSENSE_SECRET="<api-secret>"
+```
+
+Optional variables for plugin and override resource tests:
+
+```bash
+export OPNSENSE_MANUAL_PLUGIN="caddy"
+export OPNSENSE_MANUAL_PLUGIN_CONTROLLER="service"
+export OPNSENSE_MANUAL_HOST_OVERRIDE_UUID="<existing-host-override-uuid>"
+export OPNSENSE_MANUAL_ALIAS_OVERRIDE_UUID="<existing-alias-override-uuid>"
+```
 
 ## Pact runtime notes
 
