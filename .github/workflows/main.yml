@@ -37,8 +37,32 @@ jobs:
       - name: Setup Dagger
         uses: dagger/dagger-for-github@v7
 
+      - name: Wait for Docker daemon
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in {1..20}; do
+            if docker info >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 3
+          done
+          docker info
+
+      - name: Clean stale Dagger engines
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker ps -a --format '{{.Names}}' | grep '^dagger-engine' | xargs -r docker rm -f || true
+
       - name: Dagger version
-        run: dagger version
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! dagger version; then
+            docker ps -a --format '{{.Names}}' | grep '^dagger-engine' | xargs -r docker rm -f || true
+            dagger version
+          fi
 
       - name: Run CI task via Dagger
         shell: bash
@@ -91,6 +115,24 @@ jobs:
       - name: Setup Dagger
         uses: dagger/dagger-for-github@v7
 
+      - name: Wait for Docker daemon
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in {1..20}; do
+            if docker info >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 3
+          done
+          docker info
+
+      - name: Clean stale Dagger engines
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker ps -a --format '{{.Names}}' | grep '^dagger-engine' | xargs -r docker rm -f || true
+
       - name: Run pact tests task via Dagger
         shell: bash
         run: |
@@ -116,8 +158,32 @@ jobs:
       - name: Setup Dagger
         uses: dagger/dagger-for-github@v7
 
+      - name: Wait for Docker daemon
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in {1..20}; do
+            if docker info >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 3
+          done
+          docker info
+
+      - name: Clean stale Dagger engines
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker ps -a --format '{{.Names}}' | grep '^dagger-engine' | xargs -r docker rm -f || true
+
       - name: Dagger version
-        run: dagger version
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! dagger version; then
+            docker ps -a --format '{{.Names}}' | grep '^dagger-engine' | xargs -r docker rm -f || true
+            dagger version
+          fi
 
       - name: Semver release
         id: release
