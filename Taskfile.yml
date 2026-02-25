@@ -6,7 +6,12 @@ tasks:
   dagger:login:
     desc: Login to Dagger Cloud organization
     cmds:
-      - dagger login $DAGGER_ORG_ID
+      - |
+        if [ "${CI:-}" = "true" ] || [ "${GITHUB_ACTIONS:-}" = "true" ]; then
+          echo "Skipping interactive dagger login in CI."
+          exit 0
+        fi
+        dagger login "$DAGGER_ORG_ID"
 
   init:local:
     cmds:
