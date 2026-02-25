@@ -158,17 +158,7 @@ jobs:
       - name: Setup Dagger
         uses: dagger/dagger-for-github@v8.2.0
 
-      - name: Wait for Docker daemon
-        shell: bash
-        run: |
-          set -euo pipefail
-          for i in {1..20}; do
-            if docker info >/dev/null 2>&1; then
-              exit 0
-            fi
-            sleep 3
-          done
-          docker info
+
 
       - name: Clean stale Dagger engines
         shell: bash
