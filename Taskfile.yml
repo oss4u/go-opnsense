@@ -9,7 +9,6 @@ tasks:
       - dagger login $DAGGER_ORG_ID
 
   init:local:
-    internal: true
     cmds:
       - go mod tidy
 
@@ -21,7 +20,6 @@ tasks:
       - dagger run -- mise exec -- task init:local
 
   build:local:
-    internal: true
     cmds:
       - go build -v ./...
 
@@ -33,7 +31,6 @@ tasks:
       - dagger run -- mise exec -- task build:local
 
   test:local:
-    internal: true
     cmds:
       - go test ./...
 
@@ -45,7 +42,6 @@ tasks:
       - dagger run -- mise exec -- task test:local
 
   test:ci:local:
-    internal: true
     env:
       CI: "true"
     cmds:
@@ -59,7 +55,6 @@ tasks:
       - dagger run -- mise exec -- task test:ci:local
 
   lint:local:
-    internal: true
     cmds:
       - golangci-lint run --config=.golangci.yml
 
@@ -71,7 +66,6 @@ tasks:
       - dagger run -- mise exec -- task lint:local
 
   fmt:lint:local:
-    internal: true
     cmds:
       - golangci-lint fmt --config=.golangci.yml
 
@@ -94,7 +88,6 @@ tasks:
       - pre-commit run --all-files
 
   pact:install:local:
-    internal: true
     cmds:
       - mkdir -p .pact/lib
       - go run github.com/pact-foundation/pact-go/v2@v2.4.2 install --force --libDir .pact/lib
@@ -107,12 +100,13 @@ tasks:
       - dagger run -- mise exec -- task pact:install:local
 
   test:pact:local:
-    internal: true
     deps:
       - pact:install:local
     cmds:
       - |
         set -eu
+
+        repo_root="${PWD}"
         lib_file="$(find .pact/lib -maxdepth 1 -type f \( -name 'libpact_ffi.dylib' -o -name 'libpact_ffi.so' -o -name 'libpact_ffi.so.*' \) | head -n 1)"
         if [ -z "$lib_file" ]; then
           echo "libpact_ffi was not found in .pact/lib"
@@ -123,6 +117,14 @@ tasks:
         lib_base="$(basename "$lib_file")"
         rm -f "/tmp/$lib_base"
         cp "$lib_file" "/tmp/$lib_base"
+
+        pact_test_dirs="$(find . -type f -name '*_pact*_test.go' -exec dirname {} \; | sort -u)"
+        for dir in $pact_test_dirs; do
+          [ "$dir" = "." ] && continue
+          mkdir -p "$dir/.pact"
+          rm -rf "$dir/.pact/lib"
+          ln -s "$repo_root/.pact/lib" "$dir/.pact/lib"
+        done
 
         case "$lib_base" in
           *.dylib)
@@ -148,7 +150,6 @@ tasks:
       - dagger run -- mise exec -- task test:pact:local
 
   ci:local:
-    internal: true
     cmds:
       - task: init:local
       - task: lint:local
@@ -170,7 +171,6 @@ tasks:
       - dagger run -- mise exec -- task test:pact:local
 
   release:local:
-    internal: true
     cmds:
       - go build -v ./...
 

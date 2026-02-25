@@ -13,6 +13,8 @@ Implemented OPNsense module:
 - `unbound/service`
 - `unbound/settings`
 - `unbound/settings` host overrides and host aliases (CRUD wrappers in `overrides` package)
+- generic `core` API resources (`/api/core/<controller>/{add,get,search,set,del,toggle}`)
+- generic plugin API resources (`/api/<plugin>/<controller>/{add,get,search,set,del,toggle}`)
 
 ## Requirements
 
@@ -174,9 +176,39 @@ In CI, the `pact-tests` job runs the same `Taskfile` task through Dagger.
 ```go
 api := opnsense.GetOpnSenseClient("", "", "")
 unboundApi := unbound.New(api)
+
+coreResourceApi := coreresources.New(api, "service")
+pluginResourceApi := pluginresources.New(api, "caddy", "service")
+
+coreApi := core.New(api)
+pluginApi := plugins.New(api, "caddy")
+
+viaCoreController := coreApi.Controller("service")
+viaPluginController := pluginApi.Controller("service")
+
+typedCoreService := coreApi.Service()
+typedCaddyService := pluginApi.Caddy().Service()
+
+registry := plugins.NewRegistry(api)
+samePlugin := registry.Plugin("caddy")
+_ = samePlugin.Controller("service")
 ```
 
 Passing empty values uses `OPNSENSE_ADDRESS`, `OPNSENSE_KEY`, and `OPNSENSE_SECRET` from the environment.
+
+Imports for generic resource APIs:
+
+```go
+import coreresources "github.com/oss4u/go-opnsense/opnsense/core/resources"
+import pluginresources "github.com/oss4u/go-opnsense/opnsense/plugins/resources"
+import "github.com/oss4u/go-opnsense/opnsense/core"
+import "github.com/oss4u/go-opnsense/opnsense/plugins"
+import coreservice "github.com/oss4u/go-opnsense/opnsense/core/service"
+import caddyservice "github.com/oss4u/go-opnsense/opnsense/plugins/caddy/service"
+```
+
+All requests are serialized by the client lock. Even when called concurrently,
+only one HTTP request is in-flight at a time.
 
 ## Unbound API usage
 
