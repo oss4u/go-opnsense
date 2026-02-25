@@ -41,10 +41,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if ! dagger run -- mise exec -- task ci; then
+          if ! mise exec -- task ci; then
             echo "First Dagger run failed; cleaning stale engine container(s) and retrying once..."
             docker ps -a --format '{{.Names}}' | grep '^dagger-engine' | xargs -r docker rm -f || true
-            dagger run -- mise exec -- task ci
+            mise exec -- task ci
           fi
 
   pact-tests:
@@ -92,10 +92,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if ! dagger run -- mise exec -- task pact:install test:pact; then
+          if ! mise exec -- task pact:ci; then
             echo "First Dagger run failed; cleaning stale engine container(s) and retrying once..."
             docker ps -a --format '{{.Names}}' | grep '^dagger-engine' | xargs -r docker rm -f || true
-            dagger run -- mise exec -- task pact:install test:pact
+            mise exec -- task pact:ci
           fi
 
   release:
@@ -120,3 +120,8 @@ jobs:
           release: true
           git-user: 'version'
           git-user-email: 'info@sys-int.de'
+
+      - name: Automatic Rebase
+        uses: cirrus-actions/rebase@1.8
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

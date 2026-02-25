@@ -1,37 +1,86 @@
 version: '3'
 
+dotenv: ['.env', '{{.ENV}}/.env', '{{.HOME}}/.env']
+
 tasks:
-  init:
-    desc: Prepare Go module dependencies
+  dagger:login:
+    desc: Login to Dagger Cloud organization
+    cmds:
+      - dagger login $DAGGER_ORG_ID
+
+  init:local:
+    internal: true
     cmds:
       - go mod tidy
 
-  build:
-    desc: Build all Go packages
+  init:
+    desc: Prepare Go module dependencies (via Dagger)
+    deps:
+      - dagger:login
+    cmds:
+      - dagger run -- mise exec -- task init:local
+
+  build:local:
+    internal: true
     cmds:
       - go build -v ./...
 
-  test:
-    desc: Run unit and integration tests
+  build:
+    desc: Build all Go packages (via Dagger)
+    deps:
+      - dagger:login
+    cmds:
+      - dagger run -- mise exec -- task build:local
+
+  test:local:
+    internal: true
     cmds:
       - go test ./...
 
-  test:ci:
-    desc: Run tests in CI mode
+  test:
+    desc: Run unit and integration tests (via Dagger)
+    deps:
+      - dagger:login
+    cmds:
+      - dagger run -- mise exec -- task test:local
+
+  test:ci:local:
+    internal: true
     env:
       CI: "true"
     cmds:
       - go test ./...
 
-  lint:
-    desc: Run golangci-lint with repository configuration
+  test:ci:
+    desc: Run tests in CI mode (via Dagger)
+    deps:
+      - dagger:login
+    cmds:
+      - dagger run -- mise exec -- task test:ci:local
+
+  lint:local:
+    internal: true
     cmds:
       - golangci-lint run --config=.golangci.yml
 
-  fmt:lint:
-    desc: Apply golangci-lint formatters
+  lint:
+    desc: Run golangci-lint with repository configuration (via Dagger)
+    deps:
+      - dagger:login
+    cmds:
+      - dagger run -- mise exec -- task lint:local
+
+  fmt:lint:local:
+    internal: true
     cmds:
       - golangci-lint fmt --config=.golangci.yml
+
+  fmt:lint:
+    desc: Apply golangci-lint formatters (via Dagger)
+    deps:
+      - dagger:login
+    cmds:
+      - dagger run -- mise exec -- task fmt:lint:local
 
   pre-commit:install:
     desc: Install pre-commit hooks
@@ -44,16 +93,23 @@ tasks:
     cmds:
       - pre-commit run --all-files
 
-  pact:install:
-    desc: Install Pact FFI runtime into local repo folder
+  pact:install:local:
+    internal: true
     cmds:
       - mkdir -p .pact/lib
       - go run github.com/pact-foundation/pact-go/v2@v2.4.2 install --force --libDir .pact/lib
 
-  test:pact:
-    desc: Run pact-tagged tests
+  pact:install:
+    desc: Install Pact FFI runtime into local repo folder (via Dagger)
     deps:
-      - pact:install
+      - dagger:login
+    cmds:
+      - dagger run -- mise exec -- task pact:install:local
+
+  test:pact:local:
+    internal: true
+    deps:
+      - pact:install:local
     cmds:
       - |
         set -eu
@@ -84,10 +140,58 @@ tasks:
 
         go test -tags pact ./...
 
-  ci:
-    desc: Full CI pipeline (init, lint, build, tests)
+  test:pact:
+    desc: Run pact-tagged tests (via Dagger)
+    deps:
+      - dagger:login
     cmds:
-      - task: init
-      - task: lint
-      - task: build
-      - task: test:ci
+      - dagger run -- mise exec -- task test:pact:local
+
+  ci:local:
+    internal: true
+    cmds:
+      - task: init:local
+      - task: lint:local
+      - task: build:local
+      - task: test:ci:local
+
+  ci:
+    desc: Full CI pipeline (init, lint, build, tests) via Dagger
+    deps:
+      - dagger:login
+    cmds:
+      - dagger run -- mise exec -- task ci:local
+
+  pact:ci:
+    desc: Run Pact pipeline in Dagger
+    deps:
+      - dagger:login
+    cmds:
+      - dagger run -- mise exec -- task test:pact:local
+
+  release:local:
+    internal: true
+    cmds:
+      - go build -v ./...
+
+  release:
+    desc: Build release artifacts via Dagger
+    deps:
+      - dagger:login
+    cmds:
+      - dagger run -- mise exec -- task release:local
+
+  vagrant:start:
+    desc: Start Vagrant VM
+    cmds:
+      - vagrant up
+
+  vagrant:stop:
+    desc: Stop Vagrant VM
+    cmds:
+      - vagrant stop
+
+  vagrant:destroy:
+    desc: Destroy Vagrant VM
+    cmds:
+      - vagrant destroy -f
