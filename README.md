@@ -98,10 +98,12 @@ Run the local CI task (tidy + lint + build + tests):
 task ci
 ```
 
-Run the same CI task in an isolated Dagger environment:
+`task ci` runs in an isolated Dagger environment and is the same entry-point used by CI.
+
+Run only the Pact pipeline (also via Dagger):
 
 ```bash
-dagger run -- task ci
+task pact:ci
 ```
 
 ### 3) Commit message policy
@@ -117,10 +119,10 @@ Examples:
 ### 4) Branch/CI behavior
 
 - Push to `develop`:
-    - `ci` (runs `dagger run -- task ci`)
+    - `ci` (runs `task ci`)
 - Pull request to `main`:
     - `ci`
-    - `pact-tests` (runs `dagger run -- task test:pact`)
+    - `pact-tests` (runs `task pact:ci`)
 - Push to `main`:
     - `ci`
     - `pact-tests`
@@ -138,8 +140,11 @@ Core tasks:
 - `task test` — `go test ./...`
 - `task test:ci` — CI-mode tests
 - `task ci` — full pipeline (`init`, `lint`, `build`, `test:ci`)
+- `task pact:ci` — Pact pipeline in Dagger
 - `task pact:install` — install Pact FFI runtime to `.pact/lib`
 - `task test:pact` — run `go test -tags pact ./...`
+- `task release` — build release artifacts via Dagger
+- `task vagrant:start|stop|destroy` — local Vagrant helper tasks
 
 ## Pact runtime notes
 
