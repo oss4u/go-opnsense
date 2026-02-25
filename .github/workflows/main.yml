@@ -9,6 +9,8 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     name: ci
+    env:
+      DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -53,6 +55,8 @@ jobs:
     name: pact-tests
     needs: [ci]
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/develop'
+    env:
+      DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -102,6 +106,8 @@ jobs:
     name: release
     needs: [ci]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
