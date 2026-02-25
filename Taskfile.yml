@@ -65,18 +65,18 @@ tasks:
         fi
 
         lib_base="$(basename "$lib_file")"
+        rm -f "/tmp/$lib_base"
         cp "$lib_file" "/tmp/$lib_base"
 
         case "$lib_base" in
           *.dylib)
-            ln -sf "/tmp/$lib_base" /tmp/libpact_ffi.dylib
             export DYLD_LIBRARY_PATH="/tmp:${PWD}/.pact/lib:${DYLD_LIBRARY_PATH:-}"
             ;;
           *.so)
-            ln -sf "/tmp/$lib_base" /tmp/libpact_ffi.so
             export LD_LIBRARY_PATH="/tmp:${PWD}/.pact/lib:${LD_LIBRARY_PATH:-}"
             ;;
           *.so.*)
+            rm -f /tmp/libpact_ffi.so
             ln -sf "/tmp/$lib_base" /tmp/libpact_ffi.so
             export LD_LIBRARY_PATH="/tmp:${PWD}/.pact/lib:${LD_LIBRARY_PATH:-}"
             ;;
