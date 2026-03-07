@@ -21,9 +21,10 @@ func NewOpnSenseClient(host string, key string, secret string) *OpnSenseApi {
 	}
 
 	return &OpnSenseApi{
-		address: host,
-		key:     key,
-		secret:  secret,
+		address:            host,
+		key:                key,
+		secret:             secret,
+		insecureSkipVerify: true,
 	}
 }
 
@@ -37,10 +38,10 @@ func GetOpnSenseClient(host string, key string, secret string) *OpnSenseApi {
 }
 
 type OpnSenseApi struct {
-	client  *resty.Client
-	address string
-	key     string
-	secret  string
+	client             *resty.Client
+	address            string
+	key                string
+	secret             string
 	insecureSkipVerify bool
 }
 
