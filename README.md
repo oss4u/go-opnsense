@@ -112,13 +112,21 @@ Run the same lint checks as configured in CI:
 task pre-commit:run
 ```
 
-Run the local CI task (tidy + lint + build + tests):
+`task pre-commit:run` and the GitHub `ci` workflow both execute the same command:
+
+```bash
+task lint:local
+```
+
+This guarantees identical `golangci-lint` results locally and in CI.
+
+Run the local CI task (tidy + lint + build + tests) when you also want build/test coverage:
 
 ```bash
 task ci
 ```
 
-`task ci` runs in an isolated Dagger environment and is the same entry-point used by CI.
+`task ci` runs in an isolated Dagger environment for full local validation.
 
 Run only the Pact pipeline (also via Dagger):
 
@@ -126,27 +134,24 @@ Run only the Pact pipeline (also via Dagger):
 task pact:ci
 ```
 
-### 3) Commit message policy
-
-This repository enforces Conventional Commits via `commit-msg` hook.
-
-Examples:
-
-- `feat(unbound): add settings toggle wrapper`
-- `fix(overrides): handle empty get response`
-- `chore(ci): pin golangci-lint version`
-
-### 4) Branch/CI behavior
+### 3) Branch/CI behavior
 
 - Push to `develop`:
-    - `ci` (runs `task ci`)
-- Pull request to `main`:
     - `ci`
+    - `pact-tests`
+- Pull request to `main` or `develop`:
+    - `ci` (lint-only check via `task lint:local`)
     - `pact-tests` (runs `task pact:ci`)
 - Push to `main`:
     - `ci`
     - `pact-tests`
     - `release`
+
+Post-build automation for PRs targeting `main`:
+
+- After a successful `ci` run triggered by a pull request, workflow `pr-post-build-rebase` starts.
+- It validates that the triggering PR still has fully green checks/statuses.
+- If green and the branch is in this repository (non-fork), it rebases the PR branch onto `main` and pushes with `--force-with-lease`.
 
 ## Taskfile commands
 
