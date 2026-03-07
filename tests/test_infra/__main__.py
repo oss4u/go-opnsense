@@ -26,7 +26,7 @@ server_name = config.get("serverName") or "fw-test-sys-int"
 server_type = config.get("serverType") or "cx23"
 snapshot_name_prefix = config.get("snapshotNamePrefix") or "opnsense-"
 snapshot_id_override = config.get("snapshotIdOverride")
-location = config.get("location") or "fsn1"
+location = config.get("location")
 ssh_key_ids = config.get_object("sshKeyIds") or []
 dns_ttl = config.get_int("dnsTtl") if config.get_int("dnsTtl") is not None else 120
 proxied = config.get_bool("proxied") if config.get_bool("proxied") is not None else False
@@ -117,7 +117,6 @@ server = hcloud.Server(
     name=server_name,
     server_type=server_type,
     image=server_image,
-    location=location,
     ssh_keys=ssh_key_ids,
     public_nets=[
         hcloud.ServerPublicNetArgs(
@@ -125,6 +124,7 @@ server = hcloud.Server(
             ipv6_enabled=True,
         )
     ],
+    location=location if location else None,
     opts=pulumi.ResourceOptions(provider=hcloud_provider),
 )
 

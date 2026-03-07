@@ -37,7 +37,8 @@ pulumi config set serverName fw-test-sys-int
 pulumi config set serverType cx23
 pulumi config set snapshotNamePrefix opnsense-
 pulumi config set snapshotIdOverride 360695484
-pulumi config set location fsn1
+# optional: force a location (e.g. nbg1/hel1); omit to let Hetzner auto-place
+pulumi config set location nbg1
 pulumi config set --path sshKeyIds[0] my-ssh-key-name-or-id
 pulumi config set dnsTtl 120
 pulumi config set proxied false

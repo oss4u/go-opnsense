@@ -37,6 +37,7 @@ func TestUnboundContract_DiagnosticsOverviewService_FromDocs(t *testing.T) {
 	defer server.Close()
 
 	api := opnsense.NewOpnSenseClient(server.URL, "test-key", "test-secret")
+	api.SetInsecureSkipVerify(true)
 	client := New(api)
 
 	tests := []struct {
@@ -81,6 +82,7 @@ func TestUnboundContract_SettingsResources_FromDocs(t *testing.T) {
 	defer server.Close()
 
 	api := opnsense.NewOpnSenseClient(server.URL, "test-key", "test-secret")
+	api.SetInsecureSkipVerify(true)
 	settings := New(api).Settings
 
 	resources := []SettingsResource{
@@ -132,6 +134,7 @@ func TestUnboundContract_SettingsGeneral_FromDocs(t *testing.T) {
 	defer server.Close()
 
 	api := opnsense.NewOpnSenseClient(server.URL, "test-key", "test-secret")
+	api.SetInsecureSkipVerify(true)
 	settings := New(api).Settings
 
 	_, _, err := settings.Get()

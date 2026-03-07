@@ -41,6 +41,14 @@ type OpnSenseApi struct {
 	address string
 	key     string
 	secret  string
+	insecureSkipVerify bool
+}
+
+func (c *OpnSenseApi) SetInsecureSkipVerify(skip bool) {
+	c.insecureSkipVerify = skip
+	if c.client != nil {
+		c.client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: c.insecureSkipVerify})
+	}
 }
 
 func (c *OpnSenseApi) get_client() *resty.Client {
@@ -48,7 +56,7 @@ func (c *OpnSenseApi) get_client() *resty.Client {
 		return c.client
 	}
 	c.client = resty.New()
-	c.client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	c.client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: c.insecureSkipVerify})
 	return c.client
 }
 
