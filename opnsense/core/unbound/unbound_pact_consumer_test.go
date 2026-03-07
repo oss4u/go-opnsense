@@ -40,6 +40,7 @@ func TestUnboundPactConsumer_ServiceStatus(t *testing.T) {
 		ExecuteTest(t, func(config consumer.MockServerConfig) error {
 			baseURL := fmt.Sprintf("http://%s:%d", config.Host, config.Port)
 			api := opnsense.NewOpnSenseClient(baseURL, "test-key", "test-secret")
+			api.SetInsecureSkipVerify(true)
 			client := New(api)
 
 			raw, statusCode, callErr := client.Service.Status()
@@ -90,6 +91,7 @@ func TestUnboundPactConsumer_SettingsSet(t *testing.T) {
 		ExecuteTest(t, func(config consumer.MockServerConfig) error {
 			baseURL := fmt.Sprintf("http://%s:%d", config.Host, config.Port)
 			api := opnsense.NewOpnSenseClient(baseURL, "test-key", "test-secret")
+			api.SetInsecureSkipVerify(true)
 			client := New(api)
 
 			result, callErr := client.Settings.Set(map[string]any{

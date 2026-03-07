@@ -121,6 +121,7 @@ func TestHostsOverrideApi_CRUD_WithMockedOpnSenseEndpoints(t *testing.T) {
 	defer server.Close()
 
 	api := opnsense.NewOpnSenseClient(server.URL, "test-key", "test-secret")
+	api.SetInsecureSkipVerify(true)
 	hosts := GetHostsOverrideApi(api)
 
 	host := &OverridesHost{Host: OverridesHostDetails{
@@ -158,6 +159,7 @@ func TestAliasesOverrideApi_CRUD_WithMockedOpnSenseEndpoints(t *testing.T) {
 	defer server.Close()
 
 	api := opnsense.NewOpnSenseClient(server.URL, "test-key", "test-secret")
+	api.SetInsecureSkipVerify(true)
 	aliases := GetAliasesOverrideApi(api)
 
 	alias := &OverridesAlias{Alias: OverridesAliasDetails{

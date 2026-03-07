@@ -38,7 +38,8 @@ config:
     description: Optional explicit Hetzner snapshot image ID to use instead of name-based auto-selection
   location:
     type: string
-    default: fsn1
+    default: ""
+    description: Optional Hetzner location (leave empty for automatic placement)
   sshKeyIds:
     type: array
     items:
