@@ -34,7 +34,22 @@ func (o OverridesHostsApi) Create(host *OverridesHost) (*OverridesHost, error) {
 		return nil, fmt.Errorf("error unmarshalling response: %w", err)
 	}
 
-	host.Host.Uuid = result.Uuid
+	uuid := result.Uuid
+	if uuid == "" {
+		uuid = extractUUIDFromResponse(request)
+	}
+	if uuid == "" {
+		resolved, resolveErr := findHostOverrideUUIDByHostDomain(o.api, host.Host.Hostname, host.Host.Domain)
+		if resolveErr != nil {
+			return nil, fmt.Errorf("error resolving created host uuid: %w", resolveErr)
+		}
+		uuid = resolved
+	}
+	if err := requireUUID("host override", request, uuid); err != nil {
+		return nil, err
+	}
+
+	host.Host.Uuid = uuid
 	return host, nil
 }
 
