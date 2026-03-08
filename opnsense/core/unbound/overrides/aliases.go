@@ -29,7 +29,22 @@ func (o OverridesAliasesApi) Create(alias *OverridesAlias) (*OverridesAlias, err
 		return nil, fmt.Errorf("error unmarshalling response: %w", err)
 	}
 
-	alias.Alias.Uuid = result.Uuid
+	uuid := result.Uuid
+	if uuid == "" {
+		uuid = extractUUIDFromResponse(request)
+	}
+	if uuid == "" {
+		resolved, resolveErr := findHostAliasUUIDByHostDomain(o.api, alias.Alias.Hostname, alias.Alias.Domain)
+		if resolveErr != nil {
+			return nil, fmt.Errorf("error resolving created alias uuid: %w", resolveErr)
+		}
+		uuid = resolved
+	}
+	if err := requireUUID("host alias", request, uuid); err != nil {
+		return nil, err
+	}
+
+	alias.Alias.Uuid = uuid
 	return alias, nil
 }
 

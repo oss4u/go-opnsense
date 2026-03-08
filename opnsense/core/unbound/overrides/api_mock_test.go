@@ -15,13 +15,13 @@ import (
 )
 
 type mockApiState struct {
-	hosts   map[string]string
+	hosts   map[string]map[string]string
 	aliases map[string]OverridesAlias
 }
 
 func newMockOpnSenseServer(t *testing.T) *httptest.Server {
 	state := &mockApiState{
-		hosts:   map[string]string{},
+		hosts:   map[string]map[string]string{},
 		aliases: map[string]OverridesAlias{},
 	}
 
@@ -40,18 +40,28 @@ func newMockOpnSenseServer(t *testing.T) *httptest.Server {
 			err := json.NewDecoder(r.Body).Decode(&host)
 			require.NoError(t, err)
 			hostname, _ := host.Host["hostname"].(string)
-			state.hosts["host-1"] = hostname
+			domain, _ := host.Host["domain"].(string)
+			state.hosts["host-1"] = map[string]string{"hostname": hostname, "domain": domain}
+			if strings.Contains(hostname, "no-uuid") {
+				_, _ = w.Write([]byte(`{"result":"saved"}`))
+				return
+			}
 			_, _ = w.Write([]byte(`{"result":"saved","uuid":"host-1"}`))
 			return
 
 		case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/api/unbound/settings/get_host_override/"):
 			uuid := strings.TrimPrefix(r.URL.Path, "/api/unbound/settings/get_host_override/")
-			hostname, found := state.hosts[uuid]
+			hostData, found := state.hosts[uuid]
 			if !found {
 				_, _ = w.Write([]byte(`[]`))
 				return
 			}
+			hostname := hostData["hostname"]
+			domain := hostData["domain"]
 			payload := fmt.Sprintf(`{"host":{"enabled":"1","hostname":"%s","domain":"example.local","rr":{"A":{"value":"A","selected":1}},"description":"unit-test","server":"10.0.0.10"}}`, hostname)
+			if domain != "" {
+				payload = fmt.Sprintf(`{"host":{"enabled":"1","hostname":"%s","domain":"%s","rr":{"A":{"value":"A","selected":1}},"description":"unit-test","server":"10.0.0.10"}}`, hostname, domain)
+			}
 			_, _ = w.Write([]byte(payload))
 			return
 
@@ -63,8 +73,23 @@ func newMockOpnSenseServer(t *testing.T) *httptest.Server {
 			err := json.NewDecoder(r.Body).Decode(&host)
 			require.NoError(t, err)
 			hostname, _ := host.Host["hostname"].(string)
-			state.hosts[uuid] = hostname
+			domain, _ := host.Host["domain"].(string)
+			state.hosts[uuid] = map[string]string{"hostname": hostname, "domain": domain}
 			_, _ = w.Write([]byte(`{"result":"saved"}`))
+			return
+
+		case r.Method == http.MethodPost && r.URL.Path == "/api/unbound/settings/search_host_override":
+			rows := []map[string]any{}
+			for uuid, hostData := range state.hosts {
+				rows = append(rows, map[string]any{
+					"uuid":     uuid,
+					"hostname": hostData["hostname"],
+					"domain":   hostData["domain"],
+				})
+			}
+			payload, err := json.Marshal(map[string]any{"rows": rows})
+			require.NoError(t, err)
+			_, _ = w.Write(payload)
 			return
 
 		case r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/api/unbound/settings/del_host_override/"):
@@ -78,6 +103,10 @@ func newMockOpnSenseServer(t *testing.T) *httptest.Server {
 			err := json.NewDecoder(r.Body).Decode(&alias)
 			require.NoError(t, err)
 			state.aliases["alias-1"] = alias
+			if strings.Contains(alias.Alias.Hostname, "no-uuid") {
+				_, _ = w.Write([]byte(`{"result":"saved"}`))
+				return
+			}
 			_, _ = w.Write([]byte(`{"result":"saved","uuid":"alias-1"}`))
 			return
 
@@ -106,6 +135,20 @@ func newMockOpnSenseServer(t *testing.T) *httptest.Server {
 			uuid := strings.TrimPrefix(r.URL.Path, "/api/unbound/settings/del_host_alias/")
 			delete(state.aliases, uuid)
 			_, _ = w.Write([]byte(`{"result":"deleted"}`))
+			return
+
+		case r.Method == http.MethodPost && r.URL.Path == "/api/unbound/settings/search_host_alias":
+			rows := []map[string]any{}
+			for uuid, alias := range state.aliases {
+				rows = append(rows, map[string]any{
+					"uuid":     uuid,
+					"hostname": alias.Alias.Hostname,
+					"domain":   alias.Alias.Domain,
+				})
+			}
+			payload, err := json.Marshal(map[string]any{"rows": rows})
+			require.NoError(t, err)
+			_, _ = w.Write(payload)
 			return
 		}
 
@@ -189,4 +232,47 @@ func TestAliasesOverrideApi_CRUD_WithMockedOpnSenseEndpoints(t *testing.T) {
 	deleted, err := aliases.Read("alias-1")
 	require.NoError(t, err)
 	assert.Nil(t, deleted)
+}
+
+func TestHostsOverrideApi_Create_ResolvesUUIDViaSearchWhenMissingInResponse(t *testing.T) {
+	server := newMockOpnSenseServer(t)
+	defer server.Close()
+
+	api := opnsense.NewOpnSenseClient(server.URL, "test-key", "test-secret")
+	api.SetInsecureSkipVerify(true)
+	hosts := GetHostsOverrideApi(api)
+
+	host := &OverridesHost{Host: OverridesHostDetails{
+		Enabled:     true,
+		Hostname:    "no-uuid-host",
+		Domain:      "example.local",
+		Rr:          "A",
+		Description: "unit-test",
+		Server:      "10.0.0.10",
+	}}
+
+	created, err := hosts.Create(host)
+	require.NoError(t, err)
+	assert.Equal(t, "host-1", created.Host.Uuid)
+}
+
+func TestAliasesOverrideApi_Create_ResolvesUUIDViaSearchWhenMissingInResponse(t *testing.T) {
+	server := newMockOpnSenseServer(t)
+	defer server.Close()
+
+	api := opnsense.NewOpnSenseClient(server.URL, "test-key", "test-secret")
+	api.SetInsecureSkipVerify(true)
+	aliases := GetAliasesOverrideApi(api)
+
+	alias := &OverridesAlias{Alias: OverridesAliasDetails{
+		Enabled:     true,
+		Host:        "host-1",
+		Hostname:    "no-uuid-alias",
+		Domain:      "example.local",
+		Description: "unit-test-alias",
+	}}
+
+	created, err := aliases.Create(alias)
+	require.NoError(t, err)
+	assert.Equal(t, "alias-1", created.Alias.Uuid)
 }
